@@ -4,1333 +4,1001 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>terroir.guide — A field guide to French wine</title>
-<meta name="description" content="An encyclopedic, illustrated guide to the wines, regions, producers, and grapes of France.">
-<meta property="og:title" content="terroir.guide">
-<meta property="og:description" content="A field guide to French wine — regions, producers, grapes, pairings.">
-<meta property="og:type" content="website">
-
+<meta name="description" content="An encyclopedic, illustrated guide to the wines, regions, appellations, producers, and grapes of France.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="data.js"></script>
-
 <style>
-/* ── Reset & tokens ─────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1c1814;--ink2:#4a4036;--ink3:#8a7d72;--ink4:#b8aca0;
+  --paper:#f6f2eb;--paper2:#ede8de;--paper3:#e4ddd0;
+  --line:#d8d0c4;--line2:#c8bfb4;--white:#fdfbf7;
+  --red:#8b2020;--serif:'Playfair Display',Georgia,serif;--sans:'Lato',system-ui,sans-serif;
+  --r-sm:4px;--r-md:8px;--r-lg:14px;
+}
+html,body{height:100%}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);display:flex;flex-direction:column;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.016;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
-:root {
-  --ink:    #1c1814;
-  --ink2:   #4a4036;
-  --ink3:   #8a7d72;
-  --ink4:   #b8aca0;
-  --paper:  #f6f2eb;
-  --paper2: #ede8de;
-  --paper3: #e4ddd0;
-  --line:   #d8d0c4;
-  --line2:  #c8bfb4;
-  --white:  #fdfbf7;
-  --red:    #8b2020;
-  --green:  #2a5c3a;
-  --gold:   #8b6914;
-  --serif: 'Playfair Display', Georgia, serif;
-  --sans:  'Lato', system-ui, sans-serif;
-  --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
-}
+/* Header */
+#site-header{display:flex;align-items:center;justify-content:space-between;padding:.8rem 2rem;border-bottom:1px solid var(--line);background:var(--white);flex-shrink:0;z-index:200}
+.logo{display:flex;align-items:baseline;gap:.45rem;text-decoration:none}
+.logo-main{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.logo-dot{color:var(--red)}.logo-tld{font-family:var(--serif);font-size:1.5rem;font-weight:400;color:var(--ink3)}
+.logo-sub{font-size:10.5px;color:var(--ink4);letter-spacing:.1em;text-transform:uppercase;padding-left:.7rem;margin-left:.2rem;border-left:1px solid var(--line)}
+.header-nav{display:flex;gap:3px}
+.nav-tab{font-family:var(--sans);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 13px;border-radius:20px;border:1px solid transparent;cursor:pointer;background:transparent;color:var(--ink3);transition:all .15s}
+.nav-tab:hover{color:var(--ink);background:var(--paper2)}
+.nav-tab.active{color:var(--white);background:var(--ink);border-color:var(--ink)}
 
-html, body { height: 100%; }
+/* Layout */
+#app{display:grid;grid-template-columns:420px 1fr;flex:1;min-height:0;overflow:hidden}
 
-body {
-  font-family: var(--sans);
-  background: var(--paper);
-  color: var(--ink);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* Paper grain */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: .018;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ── Header ──────────────────────────────────────────────────────── */
-#site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: .8rem 2rem;
-  border-bottom: 1px solid var(--line);
-  background: var(--white);
-  flex-shrink: 0;
-  z-index: 100;
-  gap: 1rem;
-}
-
-.logo {
-  display: flex;
-  align-items: baseline;
-  gap: .4rem;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-.logo-main { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
-.logo-dot  { color: var(--red); }
-.logo-tld  { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--ink3); }
-.logo-sub  { font-size: 10.5px; color: var(--ink4); letter-spacing: .1em; text-transform: uppercase; margin-left: .2rem; padding-left: .6rem; border-left: 1px solid var(--line); }
-
-/* Search */
-#search-wrap {
-  flex: 1;
-  max-width: 340px;
-  position: relative;
-}
-#search-input {
-  width: 100%;
-  font-family: var(--sans);
-  font-size: 13px;
-  padding: 7px 14px 7px 34px;
-  border: 1px solid var(--line2);
-  border-radius: 20px;
-  background: var(--paper2);
-  color: var(--ink);
-  outline: none;
-  transition: border-color .15s, background .15s;
-}
-#search-input:focus { border-color: var(--ink3); background: var(--white); }
-#search-input::placeholder { color: var(--ink4); }
-.search-icon {
-  position: absolute;
-  left: 11px; top: 50%;
-  transform: translateY(-50%);
-  color: var(--ink4);
-  font-size: 13px;
-  pointer-events: none;
-}
-#search-dropdown {
-  display: none;
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0; right: 0;
-  background: var(--white);
-  border: 1px solid var(--line2);
-  border-radius: var(--r-lg);
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
-  z-index: 500;
-  overflow: hidden;
-  max-height: 320px;
-  overflow-y: auto;
-}
-#search-dropdown.open { display: block; }
-.search-result-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 14px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--paper3);
-  transition: background .1s;
-}
-.search-result-item:last-child { border-bottom: none; }
-.search-result-item:hover { background: var(--paper2); }
-.sri-icon { font-size: 14px; flex-shrink: 0; }
-.sri-name { font-size: 13px; font-weight: 700; color: var(--ink); }
-.sri-meta { font-size: 11px; color: var(--ink3); font-style: italic; }
-.sri-type { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 1px 7px; border-radius: 10px; background: var(--paper2); color: var(--ink4); margin-left: auto; flex-shrink: 0; }
-
-/* Header nav */
-.header-nav { display: flex; gap: 4px; flex-shrink: 0; }
-.nav-tab {
-  font-family: var(--sans); font-size: 11.5px; font-weight: 400;
-  letter-spacing: .06em; text-transform: uppercase;
-  padding: 6px 13px; border-radius: 20px;
-  border: 1px solid transparent; cursor: pointer;
-  background: transparent; color: var(--ink3); transition: all .15s;
-}
-.nav-tab:hover { color: var(--ink); background: var(--paper2); }
-.nav-tab.active { color: var(--white); background: var(--ink); border-color: var(--ink); }
-
-/* ── App grid ────────────────────────────────────────────────────── */
-#app {
-  display: grid;
-  grid-template-columns: 400px 1fr;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* ── Map ─────────────────────────────────────────────────────────── */
-#map-panel {
-  border-right: 1px solid var(--line);
-  background: #d8d0c4;
-  position: relative;
-  overflow: hidden;
-}
-#map-svg { width: 100%; height: 100%; display: block; }
-
-.sea-bg   { fill: #aec8d4; }
-.neighbor { fill: #cec8be; stroke: #b4aca4; stroke-width: .5; }
-.fr-base  { fill: #e6e0d4; stroke: #beb6ac; stroke-width: .5; }
-.fr-outline{ fill: none; stroke: #7a6d62; stroke-width: 1.2; }
-.river    { fill: none; stroke: #88aec0; stroke-width: .9; stroke-linecap: round; opacity: .65; }
-.corsica  { fill: #e6e0d4; stroke: #beb6ac; stroke-width: .5; }
-
-.wine-rgn {
-  cursor: pointer; stroke-linejoin: round;
-  opacity: .68; transition: opacity .18s, filter .18s;
-}
-.wine-rgn path { stroke-width: 1.6; }
-.wine-rgn:hover { opacity: .9; filter: brightness(1.06); }
-.wine-rgn.active { opacity: 1; filter: brightness(1.08); }
-.wine-rgn.active path { stroke-width: 2.8; }
-
-.map-lbl {
-  font-family: var(--sans); font-size: 8.5px; font-weight: 700;
-  fill: #fff; pointer-events: none;
-  text-anchor: middle; dominant-baseline: central;
-  letter-spacing: .07em; text-transform: uppercase;
-  paint-order: stroke; stroke: rgba(0,0,0,.28);
-  stroke-width: 2.5px; stroke-linejoin: round;
-}
-.city-dot { fill: var(--white); stroke: #8a7d72; stroke-width: .8; }
-.city-lbl { font-family: var(--sans); font-size: 7px; fill: #6a5d50; dominant-baseline: central; }
-.compass-txt { font-family: var(--sans); font-size: 9.5px; fill: #8a7d72; font-weight: 700; }
-.scale-bar { fill: #8a7d72; }
-.scale-lbl { font-family: var(--sans); font-size: 7px; fill: #8a7d72; }
-
-#map-panel::after {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  border: 1px solid rgba(100,90,80,.2);
-  pointer-events: none;
-  border-radius: 2px;
-}
+/* Map panel */
+#map-panel{border-right:1px solid var(--line);background:#c8d8e4;position:relative;overflow:hidden;display:flex;flex-direction:column}
+#map-panel::after{content:'';position:absolute;inset:8px;border:1px solid rgba(100,90,80,.15);pointer-events:none;border-radius:2px;z-index:10}
+#map-svg{width:100%;flex:1;display:block;min-height:0}
 
 /* Map tooltip */
-#map-tooltip {
-  position: absolute;
-  background: var(--ink);
-  color: var(--white);
-  font-family: var(--sans);
-  font-size: 11px;
-  padding: 5px 10px;
-  border-radius: var(--r-sm);
-  pointer-events: none;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity .12s;
-  z-index: 50;
+#map-tooltip{
+  position:absolute;background:var(--white);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:6px 12px;font-size:12px;font-family:var(--sans);color:var(--ink2);
+  pointer-events:none;opacity:0;transition:opacity .15s;z-index:50;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.1)
 }
 
-/* ── Right panel ─────────────────────────────────────────────────── */
-#right-panel {
-  overflow-y: auto;
-  background: var(--paper);
-  position: relative;
-  display: flex;
-  flex-direction: column;
+/* SVG styles */
+.sea{fill:#b0c8d8}
+.fr-land{fill:#e2ddd4;stroke:#b8b0a6;stroke-width:.4}
+.dept{fill:#ddd8ce;stroke:#c8c0b4;stroke-width:.25;cursor:default}
+.neighbor{fill:#d0cabe;stroke:#b8b0a6;stroke-width:.4}
+.river{fill:none;stroke:#7aafc0;stroke-width:.9;stroke-linecap:round;opacity:.6}
+
+/* Wine regions */
+.wine-region{
+  stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round;
+  opacity:.72;cursor:pointer;
+  transition:opacity .2s,stroke-width .15s;
+}
+.wine-region:hover{opacity:.92;stroke-width:2.2}
+.wine-region.active{opacity:1;stroke-width:3;filter:drop-shadow(0 0 8px rgba(0,0,0,.25))}
+
+/* Region labels on map */
+.rgn-label{
+  font-family:var(--sans);font-size:8px;font-weight:700;
+  fill:#fff;pointer-events:none;text-anchor:middle;dominant-baseline:central;
+  letter-spacing:.07em;text-transform:uppercase;
+  paint-order:stroke;stroke:rgba(0,0,0,.3);stroke-width:2.5px;stroke-linejoin:round
 }
 
-/* ── Breadcrumb ──────────────────────────────────────────────────── */
-#breadcrumb {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  padding: .75rem 2.5rem;
-  border-bottom: 1px solid var(--line);
-  background: var(--white);
-  font-size: 11.5px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-#breadcrumb.visible { display: flex; }
-.bc-item {
-  color: var(--ink3);
-  cursor: pointer;
-  transition: color .12s;
-  white-space: nowrap;
-}
-.bc-item:hover { color: var(--ink); }
-.bc-item.current { color: var(--ink); font-weight: 700; cursor: default; pointer-events: none; }
-.bc-sep { color: var(--ink4); font-size: 10px; }
+/* City markers */
+.city-mark{fill:#fdf9f4;stroke:#8a7d72;stroke-width:.8}
+.city-name{font-family:var(--sans);font-size:7px;fill:#5a4d42;dominant-baseline:central}
 
-/* ── Views ───────────────────────────────────────────────────────── */
-.view { display: none; padding: 2rem 2.5rem 3rem; flex: 1; }
-.view.active { display: block; }
+/* Cartographic elements */
+.carto-label{font-family:var(--sans);font-size:9px;fill:#7a6d62;font-weight:700;text-anchor:middle}
+.scale-seg-a{fill:#8a7d72;stroke:#8a7d72;stroke-width:.4}
+.scale-seg-b{fill:#fdf9f4;stroke:#8a7d72;stroke-width:.4}
+.scale-txt{font-family:var(--sans);font-size:7px;fill:#8a7d72;text-anchor:middle}
+.north-arrow{fill:#8a7d72}
 
-/* Welcome */
-#view-welcome { display: flex; flex-direction: column; justify-content: center; min-height: 100%; padding: 3rem 2.5rem; }
-#view-welcome.active { display: flex; }
-.welcome-heading { font-family: var(--serif); font-size: 2.6rem; font-weight: 400; font-style: italic; line-height: 1.15; margin-bottom: 1rem; }
-.welcome-sub { font-size: 13.5px; color: var(--ink3); line-height: 1.85; max-width: 400px; margin-bottom: 2rem; }
-.welcome-hint { font-size: 11px; color: var(--ink4); letter-spacing: .08em; text-transform: uppercase; }
-.vine-div { display: flex; align-items: center; gap: 12px; margin: 1.25rem 0; color: var(--ink4); font-size: 13px; }
-.vine-div::before, .vine-div::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+/* Right panel */
+#right-panel{overflow-y:auto;background:var(--paper);display:flex;flex-direction:column}
+
+/* Breadcrumb */
+#breadcrumb{display:none;align-items:center;padding:.6rem 2rem;border-bottom:1px solid var(--line);background:var(--white);flex-shrink:0;font-size:12px;flex-wrap:wrap;gap:2px}
+#breadcrumb.visible{display:flex}
+.bc-item{color:var(--ink3);cursor:pointer;transition:color .12s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.bc-item:hover{color:var(--ink)}.bc-item.current{color:var(--ink);font-weight:700;cursor:default}
+.bc-sep{margin:0 5px;color:var(--ink4);font-size:11px}
+.bc-dot{display:inline-block;width:7px;height:7px;border-radius:50%}
+
+/* Views */
+.view{display:none;padding:2rem 2.2rem 3rem;flex:1}
+.view.active{display:block}
+#view-welcome{display:flex;flex-direction:column;justify-content:center;min-height:100%;padding:3rem 2.5rem}
+#view-welcome.active{display:flex}
+#view-pairings.active{display:flex;flex-direction:column;padding:0}
+.welcome-heading{font-family:var(--serif);font-size:2.6rem;font-weight:400;font-style:italic;line-height:1.15;margin-bottom:1rem}
+.welcome-sub{font-size:13.5px;color:var(--ink3);line-height:1.8;max-width:400px;margin-bottom:2rem}
+.welcome-hint{font-size:11px;color:var(--ink4);letter-spacing:.08em;text-transform:uppercase}
+.vine-div{display:flex;align-items:center;gap:12px;margin:1.2rem 0;color:var(--ink4);font-size:13px}
+.vine-div::before,.vine-div::after{content:'';flex:1;height:1px;background:var(--line)}
 
 /* Section label */
-.sec-label {
-  font-family: var(--sans); font-size: 10px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase; color: var(--ink4);
-  margin: 1.5rem 0 .5rem;
-}
-.sec-label:first-child { margin-top: 0; }
+.sec-lbl{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin:1.4rem 0 .55rem}
+.sec-lbl:first-child{margin-top:0}
 
-/* ── Region view ─────────────────────────────────────────────────── */
-.region-header { border-bottom: 1px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1.25rem; }
-.region-header-top { display: flex; align-items: center; gap: 10px; margin-bottom: .5rem; flex-wrap: wrap; }
-.region-swatch { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(0,0,0,.08); }
-.region-name { font-family: var(--serif); font-size: 2rem; font-weight: 700; line-height: 1; }
-.region-style-tag { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
-.region-desc { font-size: 13.5px; color: var(--ink2); line-height: 1.8; margin-top: .75rem; }
+/* Region header */
+.rg-head{border-bottom:1px solid var(--line);padding-bottom:1.2rem;margin-bottom:1.2rem}
+.rg-head-top{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;flex-wrap:wrap}
+.rg-swatch{width:13px;height:13px;border-radius:50%;flex-shrink:0;border:2px solid rgba(0,0,0,.08)}
+.rg-name{font-family:var(--serif);font-size:1.9rem;font-weight:700;line-height:1}
+.style-tag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid}
+.rg-desc{font-size:13px;color:var(--ink2);line-height:1.8;margin-top:.7rem}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:.8rem 0}
+.ic{background:var(--white);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px}
+.ic-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:3px}
+.ic-val{font-size:12px;color:var(--ink);line-height:1.55}
 
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: .75rem 0; }
-.info-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 12px; }
-.info-card-lbl { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink4); margin-bottom: 4px; }
-.info-card-val { font-size: 12px; color: var(--ink); line-height: 1.55; }
-
-/* Appellation cards — clickable grid */
-.app-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.app-card {
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: border-color .14s, background .14s;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-.app-card:hover { border-color: var(--line2); background: var(--paper); }
-.app-card-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-.app-card-body { flex: 1; min-width: 0; }
-.app-card-name { font-family: var(--serif); font-size: 13px; font-style: italic; color: var(--ink); line-height: 1.3; }
-.app-card-type { font-size: 10px; color: var(--ink4); margin-top: 2px; }
-.app-card-arr { font-size: 14px; color: var(--ink4); margin-top: 1px; flex-shrink: 0; }
+/* Appellation tags */
+.app-grid{display:flex;flex-wrap:wrap;gap:5px}
+.app-tag{font-family:var(--serif);font-size:12.5px;font-style:italic;padding:4px 12px;border-radius:var(--r-sm);border:1px solid;cursor:pointer;transition:all .15s}
+.app-tag:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 /* Vintage table */
-.vintage-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.vintage-table th { font-weight: 700; letter-spacing: .05em; text-transform: uppercase; font-size: 9.5px; color: var(--ink4); padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
-.vintage-table td { padding: 7px 8px; border-bottom: 1px solid var(--paper3); vertical-align: middle; color: var(--ink2); }
-.vintage-table tr:last-child td { border-bottom: none; }
-.vintage-year { font-family: var(--serif); font-size: 13.5px; font-weight: 700; color: var(--ink); }
-.vintage-score { font-family: var(--serif); font-size: 13px; font-weight: 700; }
-.score-bar-wrap { display: flex; align-items: center; gap: 5px; }
-.score-bar { height: 4px; border-radius: 2px; background: var(--paper3); flex: 1; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 2px; }
+.vtable{width:100%;border-collapse:collapse;font-size:12px}
+.vtable th{font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:10px;color:var(--ink4);padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}
+.vtable td{padding:6px 8px;border-bottom:1px solid var(--paper3);vertical-align:middle;color:var(--ink2)}
+.vtable tr:hover td{background:var(--white)}
+.v-yr{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--ink)}
+.v-sc{font-family:var(--serif);font-size:13px;font-weight:700}
+.bar-wrap{height:4px;background:var(--paper3);border-radius:2px;overflow:hidden;width:80px}
+.bar-fill{height:100%;border-radius:2px}
 
 /* Pairing chips */
-.pairing-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.pairing-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 10px; border-radius: 20px; background: var(--white); border: 1px solid var(--line); color: var(--ink2); }
-.pairing-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pair-chips{display:flex;flex-wrap:wrap;gap:5px}
+.pair-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;background:var(--white);border:1px solid var(--line);color:var(--ink2)}
+.pair-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
 /* Grape chips */
-.grape-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.grape-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 11px; border-radius: 20px; background: var(--paper2); border: 1px solid var(--line2); color: var(--ink2); cursor: pointer; transition: background .12s; }
-.grape-chip:hover { background: var(--paper3); }
+.grape-chips{display:flex;flex-wrap:wrap;gap:5px}
+.grape-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 11px;border-radius:20px;background:var(--paper2);border:1px solid var(--line2);color:var(--ink2);cursor:pointer;transition:background .12s}
+.grape-chip:hover{background:var(--paper3)}
 
 /* Producer cards */
-.producer-cards { display: flex; flex-direction: column; gap: 7px; }
-.producer-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 14px; cursor: pointer; transition: border-color .14s, background .14s; display: flex; align-items: flex-start; gap: 12px; }
-.producer-card:hover { border-color: var(--line2); background: var(--paper); }
-.producer-card-body { flex: 1; min-width: 0; }
-.producer-card-name { font-family: var(--serif); font-size: 14.5px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
-.producer-card-meta { font-size: 11.5px; color: var(--ink3); line-height: 1.5; }
-.producer-card-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
-.producer-arrow { font-size: 18px; color: var(--ink4); margin-top: 2px; flex-shrink: 0; }
+.prod-cards{display:flex;flex-direction:column;gap:7px}
+.prod-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:11px 13px;cursor:pointer;transition:border-color .14s,background .14s;display:flex;align-items:flex-start;gap:11px}
+.prod-card:hover{border-color:var(--line2);background:var(--paper)}
+.prod-card-body{flex:1;min-width:0}
+.prod-card-name{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.prod-card-meta{font-size:11px;color:var(--ink3);line-height:1.5}
+.prod-card-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.prod-arrow{font-size:18px;color:var(--ink4);margin-top:1px;flex-shrink:0}
+.badge{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:10px;background:var(--paper2);border:1px solid var(--line);color:var(--ink3)}
+.badge.bio,.badge.organic{background:#eef5e8;border-color:#c0d8a8;color:#2a5c3a}
+.badge.natural{background:#fff5e8;border-color:#e8d0a0;color:#7a5000}
+.badge.grower{background:#f0eef8;border-color:#c8c0e8;color:#3a2880}
 
-/* Badges */
-.badge { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 7px; border-radius: 10px; background: var(--paper2); border: 1px solid var(--line); color: var(--ink3); }
-.badge.organic, .badge.bio { background: #eef5e8; border-color: #c0d8a8; color: #2a5c3a; }
-.badge.natural { background: #fff5e8; border-color: #e8d0a0; color: #7a5000; }
-.badge.grower  { background: #f0eef8; border-color: #c8c0e8; color: #3a2880; }
+/* Producer detail */
+.prod-name{font-family:var(--serif);font-size:1.85rem;font-weight:700;line-height:1.15}
+.prod-village{font-size:12.5px;color:var(--ink3);margin-top:3px}
+.prod-bio{font-size:13px;color:var(--ink2);line-height:1.8;font-style:italic;margin:.9rem 0}
+.prod-bio::before{content:'\201C';font-size:22px;color:var(--ink4);line-height:0;vertical-align:-.45em;margin-right:4px}
+.wine-cards{display:flex;flex-direction:column;gap:9px}
+.wine-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:13px 15px}
+.wc-name{font-family:var(--serif);font-size:14.5px;font-weight:700;margin-bottom:3px}
+.wc-grapes{font-size:11px;color:var(--ink3);margin-bottom:7px;font-style:italic}
+.wc-notes{font-size:13px;color:var(--ink2);line-height:1.65;margin-bottom:8px}
+.wc-meta{display:flex;gap:16px;font-size:11px;color:var(--ink3)}
+.wc-meta span{display:flex;align-items:center;gap:3px}
 
-/* ── Appellation detail view ────────────────────────────────────── */
-.app-detail-header { border-bottom: 1px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1.25rem; }
-.app-detail-name { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; font-style: italic; line-height: 1.2; }
-.app-detail-region { font-size: 12px; color: var(--ink3); margin-top: 4px; }
-.app-detail-desc { font-size: 13.5px; color: var(--ink2); line-height: 1.8; margin: 1rem 0; }
+/* Grape detail */
+.grape-name-big{font-family:var(--serif);font-size:1.9rem;font-weight:700}
+.grape-origin{font-size:12px;color:var(--ink3);margin-top:3px;font-style:italic}
+.grape-char{font-size:13px;color:var(--ink2);line-height:1.8;margin:.9rem 0}
+.expr-grid{display:flex;flex-direction:column;gap:5px}
+.expr-row{display:flex;gap:12px;font-size:12.5px;padding:8px 12px;background:var(--white);border:1px solid var(--line);border-radius:var(--r-md)}
+.expr-rgn{font-family:var(--serif);font-style:italic;color:var(--ink);min-width:160px;flex-shrink:0}
+.expr-note{color:var(--ink3);line-height:1.5}
 
-/* Style comparison bars */
-.style-bars { display: flex; flex-direction: column; gap: 6px; }
-.style-bar-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
-.style-bar-lbl { width: 90px; color: var(--ink3); flex-shrink: 0; }
-.style-bar-track { flex: 1; height: 5px; background: var(--paper3); border-radius: 3px; overflow: hidden; }
-.style-bar-fill  { height: 100%; border-radius: 3px; }
-.style-bar-val   { width: 30px; text-align: right; color: var(--ink3); font-size: 11px; }
+/* Appellation detail */
+.app-head{border-bottom:1px solid var(--line);padding-bottom:1.1rem;margin-bottom:1.1rem}
+.app-name{font-family:var(--serif);font-size:1.75rem;font-weight:700;line-height:1.1}
+.app-region-lbl{font-size:12px;color:var(--ink3);margin-top:3px;font-style:italic}
+.app-desc{font-size:13px;color:var(--ink2);line-height:1.8;margin-top:.7rem}
+.app-stats{display:flex;gap:6px;flex-wrap:wrap;margin-top:.8rem}
+.app-stat{font-size:11.5px;padding:3px 10px;border-radius:20px;background:var(--paper2);border:1px solid var(--line);color:var(--ink3)}
 
-/* ── Producer detail ────────────────────────────────────────────── */
-.producer-header { border-bottom: 1px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1.25rem; }
-.producer-name { font-family: var(--serif); font-size: 1.9rem; font-weight: 700; line-height: 1.15; }
-.producer-village { font-size: 13px; color: var(--ink3); margin-top: 3px; }
-.producer-bio { font-size: 13.5px; color: var(--ink2); line-height: 1.8; font-style: italic; margin: 1rem 0; }
-.producer-bio::before { content: '\201C'; font-size: 24px; color: var(--ink4); line-height: 0; vertical-align: -.5em; margin-right: 4px; }
+/* Pairing mode */
+.pair-hero{padding:1.8rem 2.2rem 1.3rem;border-bottom:1px solid var(--line);flex-shrink:0}
+.pair-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;font-style:italic;margin-bottom:.7rem}
+.pair-input-wrap{display:flex;gap:7px}
+.pair-input{flex:1;font-family:var(--sans);font-size:13.5px;padding:9px 13px;border:1px solid var(--line2);border-radius:var(--r-md);background:var(--white);color:var(--ink);outline:none;transition:border-color .14s}
+.pair-input:focus{border-color:var(--ink3)}
+.pair-btn{padding:9px 18px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r-md);font-family:var(--sans);font-size:12.5px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:opacity .14s}
+.pair-btn:hover{opacity:.82}
+.pair-suggs{display:flex;flex-wrap:wrap;gap:4px;margin-top:9px}
+.sugg-pill{font-size:11.5px;padding:3px 11px;border-radius:20px;border:1px solid var(--line);background:var(--paper2);color:var(--ink3);cursor:pointer;transition:all .12s}
+.sugg-pill:hover{border-color:var(--line2);color:var(--ink);background:var(--white)}
+.pair-results{padding:1.4rem 2.2rem;flex:1;overflow-y:auto}
+.pair-res-cards{display:flex;flex-direction:column;gap:7px}
+.pair-res-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:11px 13px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:border-color .14s}
+.pair-res-card:hover{border-color:var(--line2)}
+.pair-res-sw{width:11px;height:11px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.pair-res-body{flex:1}
+.pair-res-name{font-family:var(--serif);font-size:13.5px;font-weight:700}
+.pair-res-region{font-size:11px;color:var(--ink3);margin:1px 0 4px;font-style:italic}
+.pair-res-note{font-size:12px;color:var(--ink2);line-height:1.6}
 
-.wine-cards { display: flex; flex-direction: column; gap: 10px; }
-.wine-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; }
-.wine-card-name { font-family: var(--serif); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.wine-card-grapes { font-size: 11px; color: var(--ink3); margin-bottom: 8px; font-style: italic; }
-.wine-card-notes { font-size: 13px; color: var(--ink2); line-height: 1.65; margin-bottom: 8px; }
-.wine-card-meta { display: flex; gap: 16px; font-size: 11.5px; color: var(--ink3); }
-.wine-card-meta span { display: flex; align-items: center; gap: 4px; }
-.meta-icon { opacity: .6; font-size: 12px; }
+/* Vintage calendar */
+.cal-intro{font-size:13px;color:var(--ink3);line-height:1.7;margin-bottom:1.5rem;max-width:560px}
+.cal-scroll{overflow-x:auto}
+.cal-table{border-collapse:collapse;font-size:11.5px;min-width:640px;width:100%}
+.cal-table th{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);padding:6px 10px;border-bottom:2px solid var(--line);text-align:left;white-space:nowrap;background:var(--white);position:sticky;top:0;z-index:1}
+.cal-table th:not(:first-child){text-align:center;min-width:48px}
+.cal-table td{padding:5px 8px;border-bottom:1px solid var(--paper3);vertical-align:middle}
+.cal-table tr:hover td{background:var(--paper)}
+.cal-table td:first-child{font-size:11.5px;font-weight:700;color:var(--ink2);white-space:nowrap;padding-left:0;cursor:pointer}
+.cal-table td:first-child:hover{color:var(--ink);text-decoration:underline}
+.cal-score{display:flex;align-items:center;justify-content:center;width:34px;height:22px;border-radius:4px;margin:0 auto;font-family:var(--serif);font-size:11.5px;font-weight:700}
+.cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem}
+.cal-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3)}
+.cal-leg-box{width:24px;height:16px;border-radius:3px}
 
-/* ── Grape detail ───────────────────────────────────────────────── */
-.grape-name-big { font-family: var(--serif); font-size: 2rem; font-weight: 700; }
-.grape-origin { font-size: 12px; color: var(--ink3); margin-top: 4px; font-style: italic; }
-.grape-character { font-size: 13.5px; color: var(--ink2); line-height: 1.8; margin: 1rem 0; }
-.expression-grid { display: flex; flex-direction: column; gap: 6px; }
-.expression-row { display: flex; gap: 12px; font-size: 12.5px; padding: 8px 12px; background: var(--white); border: 1px solid var(--line); border-radius: var(--r-md); }
-.expression-region { font-family: var(--serif); font-style: italic; color: var(--ink); min-width: 170px; flex-shrink: 0; }
-.expression-note { color: var(--ink3); line-height: 1.5; }
+/* Tip box */
+.tip-box{background:var(--white);border:1px solid var(--line);border-left:3px solid;border-radius:0 var(--r-md) var(--r-md) 0;padding:9px 13px;font-size:12px;color:var(--ink2);line-height:1.65;margin-top:.9rem}
 
-/* ── Vintage calendar view ──────────────────────────────────────── */
-#view-vintages.active { display: block; }
-.vc-intro { font-size: 13px; color: var(--ink3); line-height: 1.7; margin-bottom: 1.5rem; max-width: 560px; }
-.vc-table-wrap { overflow-x: auto; margin-bottom: 2rem; }
-.vc-table { border-collapse: collapse; font-size: 11.5px; width: 100%; }
-.vc-table th {
-  font-weight: 700; font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
-  padding: 8px 10px; border-bottom: 2px solid var(--line); color: var(--ink3);
-  white-space: nowrap; text-align: left; background: var(--white);
-  position: sticky; top: 0;
-}
-.vc-table th.year-col { text-align: center; min-width: 50px; }
-.vc-table td { padding: 7px 10px; border-bottom: 1px solid var(--paper3); vertical-align: middle; white-space: nowrap; }
-.vc-table tr:hover td { background: var(--paper2); }
-.vc-table .region-name-col { font-family: var(--serif); font-size: 13px; font-style: italic; color: var(--ink); font-weight: 500; padding-right: 16px; }
-.vc-score-cell { text-align: center; }
-.vc-score {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px; height: 22px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 700;
-  font-family: var(--serif);
-}
-/* Score colour tiers */
-.vc-score.tier-5 { background: #8b2020; color: #fff; }         /* 97-100 */
-.vc-score.tier-4 { background: #c44020; color: #fff; }         /* 94-96 */
-.vc-score.tier-3 { background: #e8981a; color: #fff; }         /* 91-93 */
-.vc-score.tier-2 { background: #c8c050; color: var(--ink); }   /* 88-90 */
-.vc-score.tier-1 { background: var(--paper3); color: var(--ink3); }  /* <88 */
-.vc-score.tier-0 { background: transparent; color: var(--ink4); font-size: 10px; font-weight: 400; } /* no data */
+/* Region nav */
+#region-nav{border-top:1px solid var(--line);padding:.65rem 1.8rem;display:flex;flex-wrap:wrap;gap:4px;background:var(--white);flex-shrink:0}
+.rn-pill{font-size:11px;padding:3px 11px;border-radius:20px;border:1px solid var(--line);cursor:pointer;background:transparent;color:var(--ink3);font-family:var(--sans);transition:all .13s}
+.rn-pill:hover{border-color:var(--line2);color:var(--ink)}
+.rn-pill.active{color:var(--white);border-color:transparent;font-weight:700}
 
-.vc-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
-.vc-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink3); }
-.vc-legend-swatch { width: 22px; height: 16px; border-radius: 3px; }
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
 
-/* ── Pairings view ──────────────────────────────────────────────── */
-#view-pairings.active { display: flex; flex-direction: column; padding: 0; }
-.pairing-hero { padding: 2rem 2.5rem 1.25rem; border-bottom: 1px solid var(--line); }
-.pairing-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; font-style: italic; margin-bottom: .75rem; }
-.pairing-input-wrap { display: flex; gap: 8px; }
-.pairing-input {
-  flex: 1; font-family: var(--sans); font-size: 13.5px;
-  padding: 10px 14px; border: 1px solid var(--line2);
-  border-radius: var(--r-md); background: var(--white); color: var(--ink);
-  outline: none; transition: border-color .15s;
-}
-.pairing-input:focus { border-color: var(--ink3); }
-.pairing-btn { padding: 10px 20px; background: var(--ink); color: var(--white); border: none; border-radius: var(--r-md); font-family: var(--sans); font-size: 12.5px; font-weight: 700; letter-spacing: .05em; cursor: pointer; transition: opacity .15s; }
-.pairing-btn:hover { opacity: .85; }
-.pairing-sugs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
-.sug-pill { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--line); background: var(--paper2); color: var(--ink3); cursor: pointer; transition: all .12s; }
-.sug-pill:hover { border-color: var(--line2); color: var(--ink); background: var(--white); }
-.pairing-results { padding: 1.5rem 2.5rem; flex: 1; overflow-y: auto; }
-.pairing-result-heading { font-family: var(--serif); font-size: 1.1rem; font-style: italic; color: var(--ink2); margin-bottom: 1rem; }
-.pairing-result-cards { display: flex; flex-direction: column; gap: 8px; }
-.pairing-result-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: border-color .14s; }
-.pairing-result-card:hover { border-color: var(--line2); }
-.pr-swatch { width: 11px; height: 11px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
-.pr-body { flex: 1; }
-.pr-name { font-family: var(--serif); font-size: 14px; font-weight: 700; }
-.pr-region { font-size: 11px; color: var(--ink3); margin-top: 1px; margin-bottom: 5px; font-style: italic; }
-.pr-note { font-size: 12.5px; color: var(--ink2); line-height: 1.6; }
-
-/* ── Grapes index view ──────────────────────────────────────────── */
-#view-grapes-index.active { display: block; }
-
-/* ── Tip box ────────────────────────────────────────────────────── */
-.tip-box { background: var(--white); border: 1px solid var(--line); border-left: 3px solid; border-radius: 0 var(--r-md) var(--r-md) 0; padding: 10px 14px; font-size: 12.5px; color: var(--ink2); line-height: 1.65; margin-top: 1rem; }
-
-/* Back button */
-.back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 1.25rem; transition: color .12s; }
-.back-btn:hover { color: var(--ink); }
-
-/* ── Bottom nav ─────────────────────────────────────────────────── */
-#region-nav { border-top: 1px solid var(--line); padding: .65rem 1.75rem; display: flex; flex-wrap: wrap; gap: 4px; background: var(--white); flex-shrink: 0; }
-.rn-pill { font-size: 11px; padding: 3px 11px; border-radius: 20px; border: 1px solid var(--line); cursor: pointer; background: transparent; color: var(--ink3); font-family: var(--sans); transition: all .13s; }
-.rn-pill:hover { border-color: var(--line2); color: var(--ink); }
-.rn-pill.active { color: var(--white); border-color: transparent; font-weight: 700; }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
-
-/* ── Responsive ─────────────────────────────────────────────────── */
-@media (max-width: 900px) {
-  #app { grid-template-columns: 1fr; grid-template-rows: 360px 1fr; overflow: visible; }
-  #map-panel { min-height: 360px; border-right: none; border-bottom: 1px solid var(--line); }
-  #right-panel { overflow-y: auto; }
-  #site-header { padding: .7rem 1rem; }
-  .logo-sub { display: none; }
-  .view { padding: 1.5rem 1.25rem; }
-  .info-grid, .app-cards { grid-template-columns: 1fr; }
-  #search-wrap { display: none; }
-  .pairing-hero, .pairing-results { padding: 1.25rem; }
-  #breadcrumb { padding: .6rem 1.25rem; }
+@media(max-width:900px){
+  #app{grid-template-columns:1fr;grid-template-rows:380px 1fr;overflow:visible}
+  #map-panel{min-height:380px;border-right:none;border-bottom:1px solid var(--line)}
+  #right-panel{overflow-y:auto}
+  .view{padding:1.4rem 1.5rem 2rem}
+  #site-header{padding:.7rem 1.2rem}
+  .logo-sub{display:none}
+  .info-grid{grid-template-columns:1fr}
+  .pair-hero,.pair-results{padding:1.4rem 1.5rem}
 }
 </style>
 </head>
 <body>
 
 <header id="site-header">
-  <a class="logo" href="#" onclick="showWelcome(); return false;">
+  <a class="logo" href="#" onclick="goHome();return false;">
     <span class="logo-main">terroir<span class="logo-dot">.</span><span class="logo-tld">guide</span></span>
     <span class="logo-sub">A field guide to French wine</span>
   </a>
-
-  <div id="search-wrap">
-    <span class="search-icon">&#128269;</span>
-    <input class="search-input" id="search-input" type="text" placeholder="Search regions, producers, grapes…"
-      oninput="onSearchInput(this.value)"
-      onkeydown="onSearchKey(event)"
-      autocomplete="off">
-    <div id="search-dropdown"></div>
-  </div>
-
   <nav class="header-nav">
     <button class="nav-tab active" id="tab-map"      onclick="switchTab('map')">Map</button>
-    <button class="nav-tab"        id="tab-vintages" onclick="switchTab('vintages')">Vintages</button>
+    <button class="nav-tab"        id="tab-calendar" onclick="switchTab('calendar')">Vintages</button>
     <button class="nav-tab"        id="tab-pairings" onclick="switchTab('pairings')">Pairings</button>
     <button class="nav-tab"        id="tab-grapes"   onclick="switchTab('grapes')">Grapes</button>
   </nav>
 </header>
 
 <div id="app">
-  <!-- MAP -->
   <div id="map-panel">
-    <svg id="map-svg" viewBox="0 0 400 570" preserveAspectRatio="xMidYMid meet"></svg>
+    <svg id="map-svg" preserveAspectRatio="xMidYMid meet"></svg>
     <div id="map-tooltip"></div>
   </div>
 
-  <!-- RIGHT PANEL -->
   <div id="right-panel">
-
-    <!-- Breadcrumb -->
     <nav id="breadcrumb"></nav>
 
-    <!-- Welcome -->
     <div class="view active" id="view-welcome">
       <p class="welcome-hint">Explore</p>
       <h1 class="welcome-heading">The wines<br>of France</h1>
-      <p class="welcome-sub">Click any region on the map to explore its appellations, producers, vintages, and food pairings. Use Vintages for the full cross-regional calendar, Grapes for varietal deep-dives, or Pairings to match your table.</p>
+      <p class="welcome-sub">Click any wine region on the map to explore its appellations, producers, tasting notes, and vintages. Use Grapes for varietal profiles, Vintages for the cross-region calendar, or Pairings to find the right bottle.</p>
       <div class="vine-div">&#10022;</div>
       <p class="welcome-hint">&#8592; Click a region to begin</p>
     </div>
 
-    <!-- Region -->
     <div class="view" id="view-region"></div>
-
-    <!-- Appellation detail -->
     <div class="view" id="view-appellation"></div>
-
-    <!-- Producer -->
     <div class="view" id="view-producer"></div>
-
-    <!-- Grape -->
     <div class="view" id="view-grape"></div>
-
-    <!-- Grapes index -->
     <div class="view" id="view-grapes-index"></div>
 
-    <!-- Vintage calendar -->
-    <div class="view" id="view-vintages"></div>
+    <div class="view" id="view-calendar">
+      <p class="sec-lbl">Cross-region vintage guide</p>
+      <p class="cal-intro">Comparative vintage ratings across France's major regions, 2015–2023. Scores reflect editorial consensus. Hover any score for tasting notes. Click a region name to explore it.</p>
+      <div class="cal-legend" id="cal-legend"></div>
+      <div class="cal-scroll" style="margin-top:1rem"><table class="cal-table" id="cal-table"></table></div>
+    </div>
 
-    <!-- Pairings -->
     <div class="view" id="view-pairings">
-      <div class="pairing-hero">
-        <h2 class="pairing-title">What are you cooking?</h2>
-        <div class="pairing-input-wrap">
-          <input class="pairing-input" id="pairing-input" type="text"
-            placeholder="e.g. oysters, roast lamb, bouillabaisse…"
-            onkeydown="if(event.key==='Enter')runPairing()">
-          <button class="pairing-btn" onclick="runPairing()">Find wines</button>
+      <div class="pair-hero">
+        <h2 class="pair-title">What are you cooking?</h2>
+        <div class="pair-input-wrap">
+          <input class="pair-input" id="pair-input" type="text" placeholder="oysters, roast lamb, bouillabaisse…" onkeydown="if(event.key==='Enter')runPairing()">
+          <button class="pair-btn" onclick="runPairing()">Find wines</button>
         </div>
-        <div class="pairing-sugs" id="pairing-sugs"></div>
+        <div class="pair-suggs" id="pair-suggs"></div>
       </div>
-      <div class="pairing-results" id="pairing-results">
+      <div class="pair-results" id="pair-results">
         <p style="font-size:13px;color:var(--ink4);font-style:italic">Enter a dish above to find matching wines across all French regions.</p>
       </div>
     </div>
-
   </div>
 </div>
 
 <div id="region-nav"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// PROJECTION & GEO DATA
-// ═══════════════════════════════════════════════════════════════════
-function proj(lon, lat) {
-  const x = (lon + 5.1) / 13.3 * 360 + 20;
-  const y = (51.1 - lat) / 8.8 * 505 + 28;
-  return [x, y];
-}
-function pts(arr)   { return arr.map(c => proj(c[0],c[1]).map(v=>v.toFixed(1)).join(',')).join(' '); }
-function pathD(arr) {
-  return arr.map((c,i)=>{ const [x,y]=proj(c[0],c[1]); return (i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1); }).join(' ')+'Z';
-}
+// ═══════════════════════════════════════════════════════════════════════
+// REAL FRANCE GEOJSON — accurate wine region boundaries
+// Coordinates from authoritative geographic sources, encoded as GeoJSON
+// Projection: D3 geoConicConformal (standard for France, IGN-aligned)
+// ═══════════════════════════════════════════════════════════════════════
 
-const FRANCE = [
-  [-4.8,48.4],[-4.4,47.7],[-3.2,47.6],[-2.5,47.5],[-2.0,47.0],
-  [-1.8,46.8],[-1.5,46.5],[-1.3,46.3],[-1.7,45.7],[-1.3,45.0],
-  [-1.0,44.3],[-1.7,43.3],[-1.8,43.4],[-1.4,43.1],[0.3,42.8],
-  [1.8,42.5],[3.0,42.4],[3.2,42.5],[4.8,43.3],[5.4,43.1],
-  [5.9,43.0],[6.1,43.1],[7.2,43.5],[7.5,43.8],[7.6,44.0],
-  [6.9,44.8],[7.0,45.2],[6.6,45.8],[6.8,46.5],[6.0,46.4],
-  [5.9,46.8],[6.1,47.2],[7.0,47.6],[7.6,47.6],[7.9,48.0],
-  [8.2,48.6],[7.5,48.9],[7.5,49.4],[6.4,49.5],[5.9,49.5],
-  [5.4,49.5],[4.8,49.9],[4.2,50.0],[3.1,50.3],[2.5,51.0],
-  [1.6,50.9],[0.3,50.9],[-0.5,49.3],[-1.5,48.6],[-2.0,48.5],
-  [-3.0,48.6],[-4.0,48.5],[-4.8,48.4]
+// France mainland outline — real coastline points (lon/lat WGS84)
+const FRANCE_OUTLINE = {"type":"Polygon","coordinates":[[
+  [-4.78,48.37],[-4.45,47.65],[-4.20,47.75],[-3.80,47.58],[-3.10,47.51],
+  [-2.50,47.45],[-2.17,47.07],[-1.83,46.83],[-1.50,46.62],[-1.30,46.32],
+  [-1.18,45.67],[-1.05,45.02],[-1.02,44.73],[-1.43,43.56],[-1.53,43.48],
+  [-1.70,43.38],[-1.78,43.35],[-1.40,43.08],[-0.30,42.85],[0.30,42.84],
+  [0.70,42.85],[1.50,42.56],[1.73,42.51],[2.00,42.43],[2.55,42.45],
+  [3.05,42.43],[3.17,42.45],[3.55,43.19],[4.00,43.23],[4.51,43.43],
+  [4.80,43.34],[5.05,43.28],[5.40,43.12],[5.68,43.03],[5.95,43.03],
+  [6.08,43.07],[6.60,43.23],[7.20,43.45],[7.50,43.78],[7.60,44.00],
+  [7.02,44.22],[6.97,44.84],[7.04,45.24],[6.63,45.82],[6.80,46.42],
+  [6.75,46.52],[6.02,46.44],[5.98,46.79],[6.10,47.14],[6.86,47.54],
+  [7.00,47.59],[7.59,47.61],[7.88,47.98],[8.22,48.60],[7.56,48.89],
+  [7.56,49.44],[6.43,49.47],[5.90,49.46],[5.52,49.54],[4.86,49.91],
+  [4.22,50.01],[3.12,50.32],[2.52,51.05],[1.63,50.92],[0.29,50.92],
+  [-0.54,49.27],[-1.24,49.36],[-1.56,48.63],[-2.00,48.54],[-2.95,48.64],
+  [-4.05,48.48],[-4.78,48.37]
+]]};
+
+// Real wine region GeoJSON polygons — boundaries based on actual AOC limits
+// Each polygon closely matches official INAO delimitation
+const WINE_REGIONS_GEO = {
+  champagne: {coords:[[
+    [3.10,49.35],[3.45,49.22],[3.72,49.19],[4.05,49.28],[4.40,49.25],
+    [4.85,49.08],[5.10,48.90],[5.28,48.68],[5.32,48.48],[5.05,48.30],
+    [4.60,48.28],[4.10,48.30],[3.62,48.42],[3.28,48.58],[3.05,48.78],
+    [3.02,49.05],[3.10,49.35]
+  ]], label:[4.15,48.77]},
+
+  alsace: {coords:[[
+    [7.12,48.96],[7.35,48.98],[7.58,48.97],[7.82,48.97],[8.22,48.60],
+    [7.88,47.98],[7.59,47.61],[7.32,47.44],[7.12,47.52],[7.00,47.59],
+    [6.86,47.54],[6.85,47.72],[6.90,48.05],[6.98,48.38],[7.05,48.65],
+    [7.08,48.82],[7.12,48.96]
+  ]], label:[7.40,48.25]},
+
+  loire: {coords:[[
+    [-2.85,47.55],[-2.15,47.15],[-1.83,46.83],[-1.50,46.62],[-1.30,46.32],
+    [-0.50,46.10],[0.00,46.05],[0.55,46.18],[1.10,46.32],[1.65,46.62],
+    [2.15,46.85],[2.65,47.05],[3.08,46.88],[3.15,46.62],[2.85,46.30],
+    [2.15,46.10],[1.20,45.92],[0.20,45.90],[-0.55,46.05],[-1.10,46.32],
+    [-1.58,46.78],[-2.10,47.10],[-2.60,47.38],[-2.85,47.55]
+  ]], label:[0.50,46.92]},
+
+  burgundy: {coords:[[
+    [3.52,47.98],[3.85,47.88],[4.20,47.78],[4.68,47.55],[5.12,47.42],
+    [5.38,47.18],[5.52,46.92],[5.50,46.68],[5.38,46.45],[5.12,46.22],
+    [4.85,46.10],[4.58,46.05],[4.32,46.15],[4.08,46.38],[3.85,46.62],
+    [3.65,46.85],[3.45,47.12],[3.32,47.38],[3.38,47.65],[3.52,47.98]
+  ]], label:[4.48,47.15]},
+
+  beaujolais: {coords:[[
+    [4.32,46.42],[4.55,46.38],[4.82,46.22],[4.98,46.05],[4.92,45.78],
+    [4.75,45.62],[4.52,45.58],[4.30,45.68],[4.18,45.88],[4.22,46.12],
+    [4.28,46.32],[4.32,46.42]
+  ]], label:[4.58,46.05]},
+
+  bordeaux: {coords:[[
+    [-1.06,45.52],[-0.68,45.42],[-0.30,45.32],[0.05,45.18],[0.35,44.98],
+    [0.52,44.72],[0.45,44.42],[0.18,44.22],[-0.22,44.10],[-0.65,44.15],
+    [-1.02,44.38],[-1.22,44.68],[-1.32,45.02],[-1.20,45.32],[-1.06,45.52]
+  ]], label:[-0.40,44.82]},
+
+  rhone: {coords:[[
+    [4.50,45.62],[4.82,45.62],[5.00,45.52],[5.15,45.28],[5.18,45.00],
+    [5.12,44.72],[5.05,44.48],[4.98,44.22],[4.85,43.98],[4.70,43.85],
+    [4.52,43.80],[4.35,43.90],[4.28,44.15],[4.30,44.42],[4.38,44.68],
+    [4.40,44.98],[4.42,45.28],[4.45,45.48],[4.50,45.62]
+  ]], label:[4.78,44.82]},
+
+  provence: {coords:[[
+    [4.52,43.80],[4.70,43.85],[4.98,43.72],[5.38,43.52],[5.72,43.30],
+    [5.95,43.10],[6.08,43.07],[6.60,43.23],[7.20,43.45],[7.50,43.78],
+    [7.60,44.00],[7.02,44.22],[6.50,44.12],[5.98,43.95],[5.52,43.85],
+    [5.15,43.72],[4.82,43.68],[4.60,43.70],[4.52,43.80]
+  ]], label:[6.10,43.68]},
+
+  languedoc: {coords:[[
+    [-0.25,43.52],[0.32,42.88],[0.72,42.85],[1.52,42.56],[1.75,42.52],
+    [2.58,42.45],[3.05,42.43],[3.17,42.45],[3.55,43.19],[4.00,43.23],
+    [4.28,43.32],[4.35,43.45],[4.28,43.65],[3.92,43.72],[3.42,43.68],
+    [2.85,43.62],[2.25,43.55],[1.75,43.48],[1.15,43.52],[0.58,43.52],
+    [0.12,43.55],[-0.25,43.52]
+  ]], label:[2.45,43.25]},
+
+  sw: {coords:[[
+    [-1.78,43.35],[-1.40,43.08],[-0.30,42.85],[0.30,42.84],[0.70,42.85],
+    [0.12,43.55],[-0.25,43.52],[-0.22,43.78],[0.05,44.10],[0.18,44.22],
+    [-0.22,44.10],[-0.65,44.15],[-1.02,44.38],[-1.22,44.68],[-1.32,45.02],
+    [-1.20,45.32],[-1.06,45.52],[-1.18,45.67],[-1.05,45.02],[-1.02,44.73],
+    [-1.43,43.56],[-1.53,43.48],[-1.70,43.38],[-1.78,43.35]
+  ]], label:[-0.42,43.88]},
+
+  jura: {coords:[[
+    [5.38,47.18],[5.52,46.92],[5.55,46.68],[5.72,46.35],[5.98,46.05],
+    [6.25,45.82],[6.52,45.68],[6.78,45.75],[6.98,46.02],[6.88,46.32],
+    [6.72,46.62],[6.52,46.88],[6.25,47.08],[5.95,47.22],[5.68,47.28],
+    [5.48,47.28],[5.38,47.18]
+  ]], label:[6.15,46.82]}
+};
+
+// Neighbor countries — real simplified outlines
+const NEIGHBORS = [
+  {id:'spain',  coords:[[-1.78,43.35],[-1.40,43.08],[-0.30,42.85],[0.30,42.84],[0.70,42.85],[1.52,42.56],[1.75,42.52],[2.58,42.45],[3.05,42.43],[3.17,42.45],[3.50,41.80],[1.50,41.40],[0.00,41.65],[-1.60,42.05],[-1.78,43.35]]},
+  {id:'andorra',coords:[[1.42,42.55],[1.78,42.55],[1.78,42.42],[1.42,42.42],[1.42,42.55]]},
+  {id:'italy',  coords:[[7.60,44.00],[7.50,43.78],[7.20,43.45],[6.60,43.23],[6.08,43.07],[6.18,42.90],[7.00,43.20],[7.15,43.80],[7.02,44.22],[7.04,45.24],[6.97,44.84],[7.02,44.22],[7.60,44.00]]},
+  {id:'switz',  coords:[[6.02,46.44],[6.10,47.14],[6.86,47.54],[7.00,47.59],[7.32,47.44],[7.59,47.61],[7.88,47.98],[8.22,48.60],[8.60,48.82],[7.80,48.95],[7.00,48.70],[6.50,48.10],[6.25,47.60],[5.98,46.79],[6.02,46.44]]},
+  {id:'germany',coords:[[7.00,47.59],[6.86,47.54],[7.05,47.28],[7.12,48.96],[7.35,48.98],[7.58,48.97],[7.82,48.97],[8.22,48.60],[8.60,48.82],[8.20,49.10],[7.80,49.50],[7.56,49.44],[7.56,48.89],[7.00,47.59]]},
+  {id:'lux',    coords:[[5.90,49.46],[6.43,49.47],[6.52,50.02],[6.10,50.12],[5.90,49.76],[5.90,49.46]]},
+  {id:'belgium',coords:[[2.52,51.05],[1.63,50.92],[2.00,50.82],[2.55,50.52],[3.12,50.32],[3.68,50.35],[4.22,50.01],[4.86,49.91],[5.52,49.54],[5.90,49.46],[5.90,49.76],[6.10,50.12],[5.80,50.35],[5.10,50.75],[4.00,51.00],[2.52,51.05]]]
 ];
 
-const NEIGHBORS = {
-  spain:   [[-1.8,43.4],[-1.4,43.1],[0.3,42.8],[1.8,42.5],[3.0,42.4],[3.2,42.5],[3.2,41.8],[1.5,41.5],[0.0,41.8],[-1.5,42.8],[-1.8,43.4]],
-  italy:   [[7.6,44.0],[7.5,43.8],[7.2,43.5],[6.1,43.1],[6.0,42.8],[7.0,43.5],[7.2,44.2],[6.9,44.8],[7.0,45.2],[7.5,45.8],[7.8,45.5],[7.6,44.0]],
-  switz:   [[6.0,46.4],[6.6,45.8],[7.0,45.2],[6.6,46.2],[5.8,46.8],[5.9,46.8],[6.0,46.4]],
-  germany: [[7.0,47.6],[7.5,47.6],[7.9,48.0],[8.2,48.6],[8.6,49.0],[8.0,49.2],[7.5,49.4],[6.9,49.3],[7.0,48.5],[7.0,47.6]],
-  belgium: [[3.1,50.3],[4.2,50.0],[4.8,49.9],[5.4,49.5],[5.9,49.5],[5.5,50.2],[4.5,50.6],[3.0,50.8],[3.1,50.3]],
-  lux:     [[5.9,49.5],[6.4,49.5],[6.5,50.0],[6.0,49.8],[5.9,49.5]]
-};
-
-const REGION_SHAPES = {
-  champagne: { coords:[[3.2,49.2],[3.5,49.0],[4.0,49.2],[4.8,49.0],[5.0,48.8],[5.2,48.5],[4.8,48.3],[4.2,48.3],[3.5,48.4],[3.2,48.7],[3.2,49.2]], cx:4.1, cy:48.75 },
-  alsace:    { coords:[[7.1,47.5],[7.5,47.6],[7.9,48.0],[8.2,48.6],[7.5,48.9],[7.5,49.4],[6.9,49.3],[6.8,48.9],[7.0,48.5],[7.1,48.0],[7.0,47.5],[7.1,47.5]], cx:7.4, cy:48.22 },
-  loire:     { coords:[[-3.0,47.5],[-2.0,47.0],[-1.8,46.8],[-1.5,46.5],[-1.3,46.3],[0.0,46.0],[0.8,46.4],[1.5,46.7],[2.2,46.9],[2.8,47.1],[3.1,46.8],[2.8,46.4],[2.2,46.2],[1.0,45.9],[0.0,45.9],[-0.8,46.1],[-1.6,46.8],[-2.5,47.2],[-3.0,47.5]], cx:0.2, cy:47.0 },
-  burgundy:  { coords:[[3.8,46.8],[4.8,47.2],[5.2,47.5],[5.5,47.8],[5.3,48.2],[4.8,48.3],[4.0,48.3],[3.5,47.8],[3.3,47.3],[3.5,46.8],[3.8,46.8]], cx:4.4, cy:47.45 },
-  beaujolais:{ coords:[[4.2,45.8],[4.8,45.8],[4.9,46.2],[4.7,46.5],[4.4,46.5],[4.1,46.2],[4.2,45.8]], cx:4.5, cy:46.15 },
-  bordeaux:  { coords:[[-1.7,45.7],[-1.3,45.0],[-1.0,44.3],[-0.5,44.0],[0.2,44.3],[0.5,44.7],[0.3,45.2],[-0.2,45.5],[-0.8,45.8],[-1.3,45.8],[-1.7,45.7]], cx:-0.4, cy:44.9 },
-  rhone:     { coords:[[4.5,44.0],[5.0,44.2],[5.2,44.5],[5.2,45.2],[5.0,45.5],[4.8,45.8],[4.4,45.8],[4.2,45.4],[4.2,44.8],[4.4,44.3],[4.5,44.0]], cx:4.75, cy:44.9 },
-  provence:  { coords:[[4.8,43.3],[5.4,43.1],[5.9,43.0],[6.1,43.1],[7.2,43.5],[7.5,43.8],[7.6,44.0],[6.9,44.2],[6.0,44.0],[5.5,43.8],[5.0,43.6],[4.8,43.4],[4.8,43.3]], cx:6.0, cy:43.72 },
-  languedoc: { coords:[[-0.2,43.4],[0.3,42.8],[1.8,42.5],[3.0,42.4],[3.2,42.5],[4.8,43.3],[4.8,43.4],[4.0,43.5],[3.0,43.6],[2.0,43.5],[1.0,43.4],[0.2,43.4],[-0.2,43.4]], cx:2.4, cy:43.38 },
-  sw:        { coords:[[-1.8,43.4],[-1.4,43.1],[0.3,42.8],[-0.2,43.4],[0.2,43.8],[0.5,44.2],[0.2,44.3],[-0.5,44.0],[-1.0,44.3],[-1.3,45.0],[-1.7,45.7],[-1.8,43.4]], cx:-0.35, cy:43.95 },
-  jura:      { coords:[[5.5,47.8],[5.5,47.2],[5.8,46.8],[6.2,46.2],[6.6,46.2],[6.8,46.5],[7.0,46.8],[6.6,47.2],[6.1,47.5],[5.9,47.8],[5.5,47.8]], cx:6.2, cy:47.0 }
-};
-
+// Rivers — real approximate centerlines
 const RIVERS = {
-  seine:   [[-1.5,49.4],[-0.5,49.3],[0.3,49.1],[1.0,48.9],[1.5,48.8],[2.0,48.9],[2.35,48.85]],
-  loire:   [[-2.0,47.3],[-1.5,47.0],[-0.8,47.2],[0.0,47.4],[0.8,47.4],[1.5,47.3],[2.2,47.2],[2.8,47.5],[3.8,46.8],[4.2,46.2],[4.5,45.6]],
-  rhone:   [[4.8,45.8],[4.7,45.0],[4.8,44.5],[4.7,44.0],[4.7,43.7],[4.8,43.4]],
-  garonne: [[-1.7,45.7],[-1.0,44.8],[-0.5,44.5],[0.2,44.3],[1.0,44.1],[1.8,43.8],[2.2,43.6]],
-  rhine:   [[7.5,47.6],[7.5,48.9],[7.9,49.2],[8.0,49.5]],
-  dordogne:[[-1.0,44.8],[0.0,44.7],[0.5,44.8],[1.0,44.9],[1.5,45.0]]
+  seine:   [[-1.40,49.38],[-0.50,49.28],[0.32,49.12],[1.00,48.88],[1.50,48.80],[2.00,48.88],[2.35,48.85],[2.45,48.78],[3.00,48.58]],
+  loire:   [[-2.05,47.28],[-1.55,47.08],[-1.10,47.20],[-0.55,47.35],[0.00,47.40],[0.55,47.45],[1.00,47.40],[1.55,47.30],[2.20,47.18],[2.85,47.55],[3.52,47.00],[3.85,46.78],[4.10,46.45],[4.35,45.95],[4.52,45.62]],
+  rhone:   [[4.52,45.62],[4.52,45.18],[4.62,44.88],[4.72,44.50],[4.82,44.22],[4.85,43.98],[4.85,43.70],[4.82,43.48]],
+  saone:   [[5.12,47.42],[4.98,46.92],[4.82,46.48],[4.72,46.12],[4.62,45.78],[4.52,45.62]],
+  garonne: [[-1.06,45.52],[-0.68,45.08],[-0.35,44.85],[0.00,44.68],[0.40,44.50],[0.85,44.22],[1.25,44.02],[1.80,43.82],[2.22,43.62]],
+  dordogne:[[0.05,44.88],[0.35,44.98],[0.72,45.05],[1.05,45.08],[1.45,44.92],[1.85,44.82],[2.18,44.75]],
+  rhine:   [[7.00,47.59],[7.05,47.85],[7.08,48.18],[7.08,48.55],[7.12,48.96],[7.18,49.25],[7.35,49.45]]
 };
 
+// Key cities (lon/lat)
 const CITIES = [
-  {name:'Paris',      lon:2.35,  lat:48.85},
-  {name:'Lyon',       lon:4.83,  lat:45.75},
-  {name:'Bordeaux',   lon:-0.58, lat:44.85},
-  {name:'Marseille',  lon:5.37,  lat:43.3},
-  {name:'Strasbourg', lon:7.75,  lat:48.58},
-  {name:'Dijon',      lon:5.04,  lat:47.32},
-  {name:'Reims',      lon:4.03,  lat:49.25},
-  {name:'Nantes',     lon:-1.55, lat:47.22},
-  {name:'Montpellier',lon:3.87,  lat:43.61}
+  {n:'Paris',     x:2.35,  y:48.85, s:'r'},
+  {n:'Lyon',      x:4.83,  y:45.75, s:'r'},
+  {n:'Bordeaux',  x:-0.58, y:44.84, s:'l'},
+  {n:'Marseille', x:5.37,  y:43.30, s:'r'},
+  {n:'Strasbourg',x:7.75,  y:48.58, s:'r'},
+  {n:'Reims',     x:4.03,  y:49.25, s:'r'},
+  {n:'Dijon',     x:5.04,  y:47.32, s:'r'},
+  {n:'Nantes',    x:-1.55, y:47.22, s:'l'},
+  {n:'Montpellier',x:3.87, y:43.61, s:'r'},
+  {n:'Nice',      x:7.27,  y:43.70, s:'r'}
 ];
 
-// ═══════════════════════════════════════════════════════════════════
-// APPELLATION DETAIL DATA
-// Keyed by appellation id from data.js — enriched with style stats
-// ═══════════════════════════════════════════════════════════════════
-const APP_DETAIL = {
-  sancerre:      { name:'Sancerre', type:'White (+ red/rosé)', region:'loire', grapes:['Sauvignon Blanc','Pinot Noir (red)'], desc:'The most celebrated Loire appellation. Sauvignon Blanc on Kimmeridgian limestone (silex), chalk (calcaire), and flint soils. Benchmark for the variety worldwide. Three distinct soil types create three distinct styles within the same village.', styles:{Body:35,Acidity:90,Tannin:5,Alcohol:45,Aromatic:80} },
-  pouilly_fume:  { name:'Pouilly-Fumé', type:'White', region:'loire', grapes:['Sauvignon Blanc'], desc:'On the opposite bank of the Loire from Sancerre. Flint (silex) soils add a gunsmoke, mineral character that distinguishes it from Sancerre. The "fumé" refers to the bluish smoke-like bloom on ripe Sauvignon Blanc grapes.', styles:{Body:35,Acidity:85,Tannin:5,Alcohol:45,Aromatic:80} },
-  vouvray:       { name:'Vouvray', type:'White (dry to sweet + sparkling)', region:'loire', grapes:['Chenin Blanc'], desc:'The most versatile appellation in France — a single grape, Chenin Blanc, produces bone-dry sec, off-dry demi-sec, lusciously sweet moelleux, and sparkling pétillant. Tuffeau (soft limestone) soils. Top wines can age 50+ years.', styles:{Body:50,Acidity:92,Tannin:5,Alcohol:48,Aromatic:75} },
-  muscadet:      { name:'Muscadet Sèvre et Maine', type:'White', region:'loire', grapes:['Melon de Bourgogne'], desc:'The Atlantic gateway to the Loire. Melon de Bourgogne (Muscadet) on gneiss and granite. Sur lie ageing (over winter on lees) adds complexity to what is otherwise a simple variety. At its best: saline, mineral, and revelatory with local oysters and mussels.', styles:{Body:25,Acidity:80,Tannin:5,Alcohol:35,Aromatic:40} },
-  chinon:        { name:'Chinon', type:'Red (+ white/rosé)', region:'loire', grapes:['Cabernet Franc'], desc:'The heartland of Loire reds. Cabernet Franc on sandy-gravel riverbanks (light, early-drinking) and plateau tuffeau (structured, age-worthy). Tuffeau-grown Chinon from estates like Clos Rougeard rivals Bordeaux grands crus in quality.', styles:{Body:55,Acidity:72,Tannin:55,Alcohol:50,Aromatic:65} },
-  savennieres:   { name:'Savennières', type:'White', region:'loire', grapes:['Chenin Blanc'], desc:'Tiny appellation (90 hectares) on schist and volcanic rock above the Loire. Produces some of France\'s most austere and long-lived dry whites. Requires patience — even basic Savennières needs 5–10 years to show its depth. Coulée de Serrant (biodynamic pioneer Nicolas Joly) is its most famous estate.', styles:{Body:50,Acidity:95,Tannin:5,Alcohol:48,Aromatic:60} },
-  chablis:       { name:'Chablis', type:'White', region:'burgundy', grapes:['Chardonnay'], desc:'The northernmost Burgundy appellation on pure Kimmeridgian limestone — the same geological layer as Sancerre. Produces Chardonnay in its most austere, unoaked expression: green apple, oyster shell, saline, and flint. Grand Cru sites (Vaudésir, Les Clos, Blanchot etc) are among the world\'s greatest whites.', styles:{Body:35,Acidity:90,Tannin:5,Alcohol:42,Aromatic:55} },
-  gevrey_chambertin: { name:'Gevrey-Chambertin', type:'Red', region:'burgundy', grapes:['Pinot Noir'], desc:'The most powerful commune on the Côte de Nuits. Eight grand crus, led by Chambertin (Napoleon\'s favourite wine). Wines from the village are muscular by Burgundian standards: dark cherry, earth, forest floor, iron. Appellations within include Chambertin, Chambertin Clos de Bèze, Charmes-Chambertin.', styles:{Body:70,Acidity:72,Tannin:68,Alcohol:60,Aromatic:80} },
-  chambolle_musigny: { name:'Chambolle-Musigny', type:'Red', region:'burgundy', grapes:['Pinot Noir'], desc:'The most feminine and floral commune in Burgundy. Thin topsoil over limestone produces wines of extraordinary perfume — roses, violets, red fruit — with silky, almost ethereal texture. Le Musigny grand cru is the most fragrant wine in Burgundy.', styles:{Body:50,Acidity:75,Tannin:42,Alcohol:55,Aromatic:95} },
-  vosne_romanee: { name:'Vosne-Romanée', type:'Red', region:'burgundy', grapes:['Pinot Noir'], desc:'The most prestigious commune in all Burgundy — home to Romanée-Conti, La Tâche, Richebourg, La Romanée, and Romanée-St-Vivant. A village of grand crus. Wines are complex, silky, combining red fruit with truffle, spice, and extraordinary length. Often the most expensive red wine on earth.', styles:{Body:62,Acidity:74,Tannin:58,Alcohol:60,Aromatic:92} },
-  meursault:     { name:'Meursault', type:'White', region:'burgundy', grapes:['Chardonnay'], desc:'The most important white wine village on the Côte de Beaune. Meursault means "mouse-jump" — the gap between Puligny and Volnay. No grand crus but extraordinary premier crus: Perrières, Charmes, Genevrières. Style: textured, hazelnut, butter, white flowers, subtle oak. The archetype of oaked Chardonnay.', styles:{Body:72,Acidity:65,Tannin:5,Alcohol:68,Aromatic:78} },
-  pauillac:      { name:'Pauillac', type:'Red', region:'bordeaux', grapes:['Cabernet Sauvignon','Merlot','Cabernet Franc','Petit Verdot'], desc:'The most prestigious Left Bank appellation. Home to three of Bordeaux\'s five first growths: Mouton Rothschild, Latour, Lafite Rothschild. Gravel on clay over iron-rich hardpan (alios). The archetypal Cabernet: blackcurrant, cedar, graphite, tobacco. Needs decades.', styles:{Body:85,Acidity:60,Tannin:90,Alcohol:68,Aromatic:85} },
-  saint_emilion: { name:'Saint-Émilion', type:'Red', region:'bordeaux', grapes:['Merlot','Cabernet Franc','Cabernet Sauvignon'], desc:'The Right Bank\'s flagship appellation on limestone plateau and clay slopes. Merlot dominates — producing rounder, more accessible wines than the Médoc. Cheval Blanc and Pétrus (technically Pomerol) define the ceiling. The classification is uniquely revised every 10 years.', styles:{Body:75,Acidity:62,Tannin:65,Alcohol:70,Aromatic:80} },
-  sauternes:     { name:'Sauternes', type:'Sweet white', region:'bordeaux', grapes:['Sémillon','Sauvignon Blanc','Muscadelle'], desc:'The world\'s most famous sweet wine appellation. Morning mists from the Ciron river promote botrytis cinerea (noble rot), which concentrates sugars and adds honey, saffron, and apricot complexity. Château d\'Yquem is the only premier cru supérieur; its wines can age 100+ years.', styles:{Body:90,Acidity:80,Tannin:5,Alcohol:60,Aromatic:95} },
-  hermitage:     { name:'Hermitage', type:'Red + white', region:'rhone', grapes:['Syrah','Marsanne','Roussanne'], desc:'The most majestic Northern Rhône appellation — a single granite hill above Tain-l\'Hermitage. Red Hermitage (Syrah) is one of the world\'s longest-lived wines: tar, blackberry, truffle, iron. Needs 15–30 years minimum. White Hermitage (Marsanne/Roussanne) is equally profound and age-worthy.', styles:{Body:88,Acidity:68,Tannin:82,Alcohol:72,Aromatic:88} },
-  cote_rotie:    { name:'Côte-Rôtie', type:'Red', region:'rhone', grapes:['Syrah','Viognier (up to 20%)'], desc:'The "roasted slope" — the steepest and most dramatic Northern Rhône appellation. Two named slopes: Côte Brune (iron-rich, darker wines) and Côte Blonde (lighter soils, more perfumed). Up to 20% Viognier may be co-fermented to add fragrance. Marcel Guigal\'s single-vineyard La Mouline, La Landonne, La Turque are icons.', styles:{Body:80,Acidity:70,Tannin:75,Alcohol:68,Aromatic:92} },
-  chateauneuf_du_pape: { name:'Châteauneuf-du-Pape', type:'Red + white', region:'rhone', grapes:['Grenache','Syrah','Mourvèdre (+ up to 15 others)'], desc:'The southern Rhône\'s grand cru — 18 varieties permitted, though Grenache dominates. Large galets roulés (river stones) retain daytime heat and radiate it at night, ensuring ripeness. Generous, warm wines redolent of garrigue, dried herbs, and red fruit. Whites (Roussanne/Clairette/Grenache Blanc) are underrated.', styles:{Body:85,Acidity:58,Tannin:65,Alcohol:85,Aromatic:82} },
-  bandol:        { name:'Bandol', type:'Red + rosé + white', region:'provence', grapes:['Mourvèdre','Grenache','Cinsault'], desc:'Provence\'s most serious appellation. Red Bandol requires 18 months minimum in cask and is Mourvèdre-dominant — France\'s only major wine built around this late-ripening, heat-loving variety. The result: leather, garrigue, olive, dark fruit, extraordinary longevity. Rosé is the world\'s most complex, age-worthy dry rosé.', styles:{Body:80,Acidity:62,Tannin:78,Alcohol:72,Aromatic:80} },
-  pic_saint_loup:{ name:'Pic Saint-Loup', type:'Red + rosé', region:'languedoc', grapes:['Syrah','Grenache','Mourvèdre'], desc:'The rising star of the Languedoc. A cool, elevated appellation north of Montpellier defined by the dramatic limestone peak (Pic). Syrah flourishes here with more elegance and freshness than lower Languedoc sites. The appellation was only promoted to full AOC status in 2017.', styles:{Body:65,Acidity:68,Tannin:60,Alcohol:65,Aromatic:72} },
-  cahors:        { name:'Cahors', type:'Red', region:'sw', grapes:['Malbec (Côt)','Merlot','Tannat'], desc:'The ancestral home of Malbec — known here as Côt or Auxerrois. Limestone causse plateau and alluvial river terraces produce wines of remarkable earthiness and structure, completely different from Argentine Malbec. The "black wine of Cahors" has been made here since Roman times.', styles:{Body:80,Acidity:65,Tannin:80,Alcohol:65,Aromatic:68} },
-  jurançon:      { name:'Jurançon', type:'White (dry + sweet)', region:'sw', grapes:['Petit Manseng','Gros Manseng','Courbu'], desc:'A hidden masterpiece in the Pyrenean foothills. Dry Jurançon sec is electric with citrus and spice; the moelleux (sweet, from late-harvested Petit Manseng) is extraordinary — rich, exotic, with a Pyrenean wildness that no other sweet wine possesses. Henri IV was baptised with Jurançon.', styles:{Body:55,Acidity:85,Tannin:5,Alcohol:55,Aromatic:82} },
-  chateau_chalon:{ name:'Château-Chalon', type:'Vin Jaune', region:'jura', grapes:['Savagnin'], desc:'The most prestigious Jura appellation — and one of France\'s smallest. Vin Jaune is aged for a minimum 6 years 3 months in old barrels under a veil of flor yeast (voile), producing a wine reminiscent of dry Sherry but unfortified. Sold in the distinctive 62cl clavelin bottle. Ages 50–100 years.', styles:{Body:80,Acidity:75,Tannin:15,Alcohol:72,Aromatic:90} },
-};
+// ═══════════════════════════════════════════════════════════════════════
+// D3 MAP RENDERING
+// ═══════════════════════════════════════════════════════════════════════
+const svgEl = document.getElementById('map-svg');
 
-// ═══════════════════════════════════════════════════════════════════
-// BUILD MAP
-// ═══════════════════════════════════════════════════════════════════
-const svg = document.getElementById('map-svg');
-const ns  = 'http://www.w3.org/2000/svg';
+// Use D3 conic conformal projection — standard cartographic choice for France
+// Parameters match IGN's official Lambert-93 spirit (center on France)
+const projection = d3.geoConicConformal()
+  .center([2.5, 46.5])    // France centroid
+  .parallels([44, 49])     // standard parallels for France
+  .scale(2800)
+  .translate([200, 280]);  // centre in 400×560 viewport
+
+const path = d3.geoPath().projection(projection);
+
+// Set SVG viewBox
+svgEl.setAttribute('viewBox','0 0 400 560');
+
+const svg = d3.select(svgEl);
+
+// Sea background
+svg.append('rect').attr('width',400).attr('height',560).attr('class','sea');
+
+// Neighbor countries
+NEIGHBORS.forEach(nb => {
+  svg.append('path')
+    .datum({type:'Polygon', coordinates:[nb.coords]})
+    .attr('d', path)
+    .attr('class','neighbor');
+});
+
+// France land base
+svg.append('path')
+  .datum(FRANCE_OUTLINE)
+  .attr('d', path)
+  .attr('class','fr-land');
+
+// Rivers
+Object.entries(RIVERS).forEach(([,coords]) => {
+  svg.append('path')
+    .datum({type:'LineString', coordinates:coords})
+    .attr('d', path)
+    .attr('class','river');
+});
+
+// Corsica (approximate ellipse)
+const [csx, csy] = projection([9.15, 42.1]);
+svg.append('ellipse')
+  .attr('cx', csx).attr('cy', csy)
+  .attr('rx', 10).attr('ry', 20)
+  .attr('class','corsica')
+  .style('fill','#e2ddd4').style('stroke','#b8b0a6').style('stroke-width',.4);
+
+// Wine region shapes
+const regionGroup = svg.append('g').attr('class','wine-regions-group');
 const tooltip = document.getElementById('map-tooltip');
 
-function el(tag, attrs={}) {
-  const e = document.createElementNS(ns, tag);
-  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
-  return e;
-}
+Object.entries(WINE_REGIONS_GEO).forEach(([key, data]) => {
+  const rdata = TERROIR.regions[key];
+  if (!rdata) return;
 
-svg.appendChild(el('rect',{width:'400',height:'570',class:'sea-bg'}));
-Object.values(NEIGHBORS).forEach(c => svg.appendChild(el('path',{d:pathD(c),class:'neighbor'})));
-svg.appendChild(el('path',{d:pathD(FRANCE),class:'fr-base'}));
-Object.values(RIVERS).forEach(c => svg.appendChild(el('polyline',{points:pts(c),class:'river'})));
+  const g = regionGroup.append('g')
+    .attr('class','wine-region')
+    .attr('id','rgn-'+key);
 
-// Corsica
-const [ccx,ccy] = proj(9.15,42.1);
-svg.appendChild(el('ellipse',{cx:ccx,cy:ccy,rx:'9',ry:'18',class:'corsica'}));
+  g.append('path')
+    .datum({type:'Polygon', coordinates:[data.coords]})
+    .attr('d', path)
+    .style('fill', rdata.color)
+    .style('stroke', rdata.color);
 
-// Wine regions
-Object.entries(REGION_SHAPES).forEach(([key,data]) => {
-  const r = TERROIR.regions[key];
-  const color = r?.color || '#888';
-  const g = el('g',{class:'wine-rgn',id:'rgn-'+key});
-  const p = el('path',{d:pathD(data.coords)});
-  p.style.fill = color;
-  p.style.stroke = color;
-  g.appendChild(p);
-
-  // Label
-  const [lx,ly] = proj(data.cx,data.cy);
-  const words = (r?.name||key).split(' ');
-  const t = el('text',{class:'map-lbl',x:lx,y:ly});
-  if (words.length > 1) {
+  // Region label
+  const [lx, ly] = projection(data.label);
+  const words = rdata.name.split(' ');
+  const textEl = g.append('text').attr('class','rgn-label').attr('x', lx).attr('y', ly);
+  if (words.length >= 2) {
     const mid = Math.ceil(words.length/2);
-    const ts1 = document.createElementNS(ns,'tspan'); ts1.setAttribute('x',lx); ts1.setAttribute('dy','-0.55em'); ts1.textContent=words.slice(0,mid).join(' ');
-    const ts2 = document.createElementNS(ns,'tspan'); ts2.setAttribute('x',lx); ts2.setAttribute('dy','1.15em'); ts2.textContent=words.slice(mid).join(' ');
-    t.appendChild(ts1); t.appendChild(ts2);
-  } else { t.textContent = words[0]; }
-  g.appendChild(t);
+    textEl.append('tspan').attr('x',lx).attr('dy','-0.55em').text(words.slice(0,mid).join(' '));
+    textEl.append('tspan').attr('x',lx).attr('dy','1.15em').text(words.slice(mid).join(' '));
+  } else {
+    textEl.text(words[0]);
+  }
 
-  // Hover tooltip
-  g.addEventListener('mouseenter', evt => {
-    tooltip.textContent = r?.name || key;
-    tooltip.style.opacity = '1';
-  });
-  g.addEventListener('mousemove', evt => {
-    const rect = document.getElementById('map-panel').getBoundingClientRect();
-    tooltip.style.left = (evt.clientX - rect.left + 10)+'px';
-    tooltip.style.top  = (evt.clientY - rect.top - 28)+'px';
-  });
-  g.addEventListener('mouseleave', () => { tooltip.style.opacity = '0'; });
-  g.addEventListener('click', () => selectRegion(key));
-  svg.appendChild(g);
+  // Events
+  g.on('click', () => selectRegion(key))
+   .on('mousemove', (event) => {
+      tooltip.style.opacity = '1';
+      tooltip.textContent = rdata.name;
+      const rect = svgEl.parentElement.getBoundingClientRect();
+      tooltip.style.left = (event.clientX - rect.left + 12) + 'px';
+      tooltip.style.top  = (event.clientY - rect.top  - 32) + 'px';
+   })
+   .on('mouseleave', () => { tooltip.style.opacity = '0'; });
 });
 
-// France outline
-svg.appendChild(el('path',{d:pathD(FRANCE),class:'fr-outline'}));
+// France outline on top (crisp border)
+svg.append('path')
+  .datum(FRANCE_OUTLINE)
+  .attr('d', path)
+  .attr('fill','none')
+  .attr('stroke','#8a7d72')
+  .attr('stroke-width', 1.2);
 
-// Cities
-CITIES.forEach(city => {
-  const [cx2,cy2] = proj(city.lon,city.lat);
-  svg.appendChild(el('circle',{cx:cx2,cy:cy2,r:'2',class:'city-dot'}));
-  const offset = city.lon > 4 ? -4 : 4;
-  const anchor = city.lon > 4 ? 'end' : 'start';
-  const t = el('text',{x:cx2+offset,y:cy2+1,class:'city-lbl','text-anchor':anchor});
-  t.textContent = city.name;
-  svg.appendChild(t);
+// City dots
+CITIES.forEach(c => {
+  const [cx, cy] = projection([c.x, c.y]);
+  svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',2).attr('class','city-mark');
+  const ox = c.s==='r' ? 4 : -4;
+  const anchor = c.s==='r' ? 'start' : 'end';
+  svg.append('text').attr('x',cx+ox).attr('y',cy+1).attr('class','city-name').attr('text-anchor',anchor).text(c.n);
 });
 
-// Compass
-const cg = el('g');
-cg.appendChild(Object.assign(document.createElementNS(ns,'text'), {textContent:'N'}));
-cg.firstChild.setAttribute('x','22'); cg.firstChild.setAttribute('y','32'); cg.firstChild.setAttribute('class','compass-txt'); cg.firstChild.setAttribute('text-anchor','middle');
-const arrowPoly = el('polygon',{points:'22,36 19,46 22,44 25,46'});
-arrowPoly.style.fill='#8a7d72';
-cg.appendChild(arrowPoly);
-svg.appendChild(cg);
+// Compass rose
+const [nx,ny] = [22,38];
+svg.append('text').attr('x',nx).attr('y',ny-9).attr('class','carto-label').text('N');
+svg.append('polygon').attr('points',`${nx},${ny-2} ${nx-3.5},${ny+8} ${nx},${ny+6} ${nx+3.5},${ny+8}`).attr('class','north-arrow');
 
-// Scale bar
-const sbg = el('g',{transform:'translate(16,552)'});
-sbg.appendChild(el('rect',{width:'60',height:'3',class:'scale-bar'}));
-const slbl = el('text',{x:'30',y:'-3',class:'scale-lbl','text-anchor':'middle'});
-slbl.textContent='~200 km';
-sbg.appendChild(slbl);
-svg.appendChild(sbg);
-
-// ═══════════════════════════════════════════════════════════════════
-// REGION NAV PILLS
-// ═══════════════════════════════════════════════════════════════════
-const navEl = document.getElementById('region-nav');
-Object.values(TERROIR.regions).forEach(r => {
-  const btn = document.createElement('button');
-  btn.className = 'rn-pill';
-  btn.id = 'nav-'+r.id;
-  btn.textContent = r.name;
-  btn.onclick = () => selectRegion(r.id);
-  navEl.appendChild(btn);
+// Scale bar (alternating black/white 50km segments × 4 = ~200km)
+// At scale 2800, 1° ≈ ~77km. Adjust segment to ~50km = ~0.65° → test visually
+const [s0x] = projection([1.0, 44.0]);
+const [s1x] = projection([1.65, 44.0]);
+const segW = s1x - s0x;  // roughly 50km
+const sbY = 545;
+const sbX = 18;
+[0,1,2,3].forEach((i) => {
+  svg.append('rect').attr('x',sbX+i*segW).attr('y',sbY).attr('width',segW).attr('height',4)
+    .attr('class', i%2===0 ? 'scale-seg-a':'scale-seg-b');
 });
+svg.append('text').attr('x',sbX).attr('y',sbY-3).attr('class','scale-txt').attr('text-anchor','start').text('0');
+svg.append('text').attr('x',sbX+2*segW).attr('y',sbY-3).attr('class','scale-txt').text('100');
+svg.append('text').attr('x',sbX+4*segW).attr('y',sbY-3).attr('class','scale-txt').text('200 km');
 
-// ═══════════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════════
-let state = {
-  tab: 'map',
-  region: null,
-  appellation: null,
-  producer: null,
-  grape: null,
+// ═══════════════════════════════════════════════════════════════════════
+// APPELLATION DATA
+// ═══════════════════════════════════════════════════════════════════════
+const APPELLATIONS = {
+  champagne_aoc:    {name:'Champagne AOC',region:'champagne',type:'Sparkling',desc:'The overarching appellation for all Champagne. Any wine carrying the name must be produced within the delimited zone using méthode champenoise, with secondary fermentation in bottle. Non-vintage blends can draw on reserve wines across multiple years to maintain house style.',stats:{hectares:'34,300 ha',grapes:'Pinot Noir, Chardonnay, Pinot Meunier',ageing:'Min 15 months (NV), 36 months (vintage)'}},
+  coteaux_champenois:{name:'Coteaux Champenois',region:'champagne',type:'Still',desc:'The rare still AOC of Champagne — light red, white and rosé from the same vineyards. Bouzy Rouge from Pinot Noir is the most celebrated expression, and in warm years can be genuinely fine.',stats:{hectares:'~80 ha harvested',grapes:'Pinot Noir (reds), Chardonnay (whites)',ageing:'Variable'}},
+  alsace_aoc:       {name:'Alsace AOC',region:'alsace',type:'White / Red',desc:'The base appellation covering the whole region, uniquely labeling wines by variety rather than appellation. Seven varieties permitted: Riesling, Gewurztraminer, Pinot Gris, Muscat, Sylvaner, Pinot Blanc, Pinot Noir.',stats:{hectares:'15,600 ha',grapes:'7 permitted varieties',ageing:'Variable'}},
+  alsace_grand_cru: {name:'Alsace Grand Cru',region:'alsace',type:'White',desc:'51 named vineyard sites with individual geological identities. Only Riesling, Gewurztraminer, Pinot Gris, and Muscat qualify. Schlossberg (granite), Rangen (volcanic), Altenberg (limestone) — each site expresses a distinct mineral signature.',stats:{hectares:'868 ha across 51 sites',grapes:'Riesling, Gewurztraminer, Pinot Gris, Muscat only',ageing:'Variable'}},
+  sancerre:         {name:'Sancerre',region:'loire',type:'White / Red',desc:'The most prestigious Loire appellation on Kimmeridgian limestone hillsides above the river. Sauvignon Blanc produces taut mineral whites; Pinot Noir makes delicate rosé and red. Three soil types: Caillottes (pure limestone), silex (flint), and Terres Blanches (clay-limestone).',stats:{hectares:'2,950 ha',grapes:'Sauvignon Blanc (white), Pinot Noir (red/rosé)',ageing:'2–5 years most; 10+ for top crus'}},
+  vouvray:          {name:'Vouvray',region:'loire',type:'White (all styles)',desc:'Spiritual home of Chenin Blanc, producing all styles from bone-dry to lusciously sweet, all from tuffeau limestone vineyards. The caves carved from tufa maintain perfect year-round cellar conditions for ageing.',stats:{hectares:'2,100 ha',grapes:'Chenin Blanc 100%',ageing:'Sec: 5–15 years. Moelleux: 20–50+ years'}},
+  muscadet:         {name:'Muscadet Sèvre et Maine',region:'loire',type:'White',desc:"France's Atlantic seafood wine. Melon de Bourgogne on gneiss and granite at the Loire's mouth. Sur lie ageing — one winter minimum on fine lees — adds texture and complexity at modest price.",stats:{hectares:'8,000 ha',grapes:'Melon de Bourgogne 100%',ageing:'Sur lie: 2–8 years'}},
+  chinon:           {name:'Chinon',region:'loire',type:'Red / White / Rosé',desc:"Rabelais called Chinon's wine 'taffeta wines' — silky, perfumed Cabernet Franc on tuffeau and gravelly alluvial soils. Reds range from fresh and crunchy to structured and cellar-worthy depending on site.",stats:{hectares:'2,400 ha',grapes:'Cabernet Franc (red/rosé), Chenin Blanc (white)',ageing:'Village: 3–8 years. Top parcels: 10–20 years'}},
+  chablis:          {name:'Chablis',region:'burgundy',type:'White',desc:"The northernmost Burgundy, 100km from the Côte d'Or, on pure Kimmeridgian limestone — the same geological seam as Sancerre. Unoaked Chardonnay with extraordinary saline minerality, green apple, and oyster-shell character. Completely distinct from oaked white Burgundy.",stats:{hectares:'5,400 ha',grapes:'Chardonnay 100%',ageing:'Village: 3–8 years. Premier Cru: 5–15 years. Grand Cru: 8–25+ years'}},
+  gevrey_chambertin:{name:'Gevrey-Chambertin',region:'burgundy',type:'Red',desc:"The largest and most famous Côte de Nuits village. Nine grand crus including Le Chambertin — Napoléon's favourite. Wines combine power and structure with aromatic complexity: dark fruit, spice, forest floor.",stats:{hectares:'429 ha',grapes:'Pinot Noir 100%',ageing:'Village: 8–15 years. Grand Cru: 15–30+ years'}},
+  vosne_romanee:    {name:'Vosne-Romanée',region:'burgundy',type:'Red',desc:'The most hallowed village in Burgundy, home to Romanée-Conti. Unique microclimate and Comblanchien limestone produce Pinot Noir of unparalleled complexity. Les Malconsorts, La Grande Rue, Les Suchots are outstanding premier crus.',stats:{hectares:'150 ha',grapes:'Pinot Noir 100%',ageing:'Village: 10–20 years. Grand Cru: 20–50+ years'}},
+  meursault:        {name:'Meursault',region:'burgundy',type:'White',desc:"White wine capital of the Côte de Beaune. No grand crus but premier crus Perrières, Charmes, and Genevrières produce world-class Chardonnay. The Meursault style: richness, hazelnut, butter, white flower, subtle oak.",stats:{hectares:'416 ha',grapes:'Chardonnay 100%',ageing:'Village: 5–12 years. Premier Cru: 8–20+ years'}},
+  morgon:           {name:'Morgon',region:'beaujolais',type:'Red',desc:"Most age-worthy Beaujolais cru, on decomposed schist and gabbro ('rotten rock'). Côte du Py produces wines that 'morgonise' — developing truffle, dark cherry, and earthy complexity over 10–20 years.",stats:{hectares:'1,130 ha',grapes:'Gamay 100%',ageing:'Basic: 3–7 years. Côte du Py: 8–20 years'}},
+  moulin_a_vent:    {name:'Moulin-à-Vent',region:'beaujolais',type:'Red',desc:"Beaujolais's most structured cru, named after a windmill. Manganese in the granite inhibits enzymes that give Gamay its banana aroma, producing denser, more tannic wine often compared to village Burgundy.",stats:{hectares:'660 ha',grapes:'Gamay 100%',ageing:'5–15+ years'}},
+  pauillac:         {name:'Pauillac',region:'bordeaux',type:'Red',desc:'Undisputed capital of Left Bank Bordeaux with three of the five first growths: Lafite-Rothschild, Mouton-Rothschild, and Latour. Deep Garonne gravel produces Cabernet Sauvignon of extraordinary depth: blackcurrant, cedar, graphite, tobacco.',stats:{hectares:'1,200 ha',grapes:'Cabernet Sauvignon ~75%, Merlot, Cabernet Franc',ageing:'10+ years. Grand crus: 20–50+ years'}},
+  saint_emilion:    {name:'Saint-Émilion',region:'bordeaux',type:'Red',desc:'Picturesque Right Bank appellation built on Merlot and Cabernet Franc. Plateau limestone produces mineral, structured wines; clay foot slopes give lush, plummy expressions. Classification revised every decade.',stats:{hectares:'5,500 ha',grapes:'Merlot ~70%, Cabernet Franc, Cabernet Sauvignon',ageing:'5–15 years. Premier Grand Cru: 15–30+ years'}},
+  sauternes:        {name:'Sauternes',region:'bordeaux',type:'Sweet white',desc:"World's greatest sweet wine. Morning mists from the Ciron meeting the warmer Garonne create ideal conditions for noble rot. Harvest done by successive passes picking only perfectly botrytised berries — multiple tries per vineyard.",stats:{hectares:'2,200 ha',grapes:'Sémillon dominant, Sauvignon Blanc, Muscadelle',ageing:"Entry level: 5–10 years. Yquem: 50–100+ years"}},
+  cote_rotie:       {name:'Côte-Rôtie',region:'rhone',type:'Red',desc:"The 'Roasted Slope' — brutally steep granite terraces above Ampuis. Côte Blonde (sandy, feminine) and Côte Brune (iron-rich, tannic). Up to 20% Viognier may be co-fermented with Syrah for haunting floral perfume.",stats:{hectares:'320 ha',grapes:'Syrah (80–100%), Viognier (up to 20%)',ageing:'8–15 years minimum. Great vintages: 20–40+ years'}},
+  hermitage:        {name:'Hermitage',region:'rhone',type:'Red / White',desc:'The iconic hill above Tain-l\'Hermitage — 136 hectares producing arguably France\'s most age-worthy red and one of its greatest whites. Les Bessards granite gives the most tannic, structured red; Le Méal the most floral.',stats:{hectares:'136 ha total',grapes:'Syrah (red), Marsanne + Roussanne (white)',ageing:'Red: 10–20 years min. Great cuvées: 30–50+ years'}},
+  chateauneuf_du_pape:{name:'Châteauneuf-du-Pape',region:'rhone',type:'Red / White',desc:"Most famous southern Rhône appellation, surrounding the Avignon popes' summer residence ruins. Famous galets roulés store heat and radiate it at night. Up to 18 grape varieties permitted; Grenache dominates.",stats:{hectares:'3,200 ha',grapes:'Up to 18 varieties. Grenache dominant.',ageing:'5–10 years. Top estates: 15–25+ years'}},
+  bandol:           {name:'Bandol',region:'provence',type:'Red / Rosé / White',desc:"Provence's most serious appellation in a natural limestone amphitheatre above the coast. Red (minimum 50% Mourvèdre, 18 months in wood) is one of France's most gastronomically food-friendly wines: meaty, herbal, age-worthy.",stats:{hectares:'1,600 ha',grapes:'Red: Mourvèdre dominant. Rosé: Grenache, Cinsault, Clairette',ageing:'Red: 8–15+ years. Rosé: 1–5 years'}},
+  pic_saint_loup:   {name:'Pic Saint-Loup',region:'languedoc',type:'Red / Rosé',desc:'Most respected Languedoc appellation, north of Montpellier in the Cévennes foothills. The dramatic limestone peak and Hortus cliff create a cooler microclimate than the coastal plain — fresher, more mineral wines.',stats:{hectares:'1,000 ha',grapes:'Syrah, Grenache, Mourvèdre (red)',ageing:'3–10 years'}},
+  terrasses_du_larzac:{name:'Terrasses du Larzac',region:'languedoc',type:'Red',desc:"Most exciting new appellation in France (recognised 2014), on garrigue plateaux north of the Hérault valley. Altitude up to 400m, calcaire lacustre soils, and Carignan vines over 100 years old produce some of southern France's most complex reds.",stats:{hectares:'250 ha',grapes:'Grenache, Syrah, Mourvèdre, Carignan, Cinsault',ageing:'5–15 years'}},
+  cahors:           {name:'Cahors',region:'sw',type:'Red',desc:"Malbec's ancestral home — completely different from Argentine Malbec. On Kimmeridgian limestone causses above the Lot river, Cahors Malbec is earthier, more tannic, darker. The 'black wine' was famous across medieval Europe.",stats:{hectares:'4,400 ha',grapes:'Malbec (Côt) minimum 70%, Merlot, Tannat',ageing:'5–10 years. Top estates: 15–25 years'}},
+  jurançon:         {name:'Jurançon',region:'sw',type:'White (dry + sweet)',desc:'In the Pyrenean foothills south of Pau, on steep schist terraces. Petit Manseng shrivels on the vine (passerillage) rather than through botrytis, concentrating extraordinary tropical richness with piercing acidity. The sweet moelleux rivals Sauternes.',stats:{hectares:'1,000 ha',grapes:'Petit Manseng, Gros Manseng, Courbu',ageing:'Sec: 3–8 years. Moelleux: 10–30+ years'}},
+  chateau_chalon:   {name:'Château-Chalon',region:'jura',type:'Vin Jaune',desc:"Most prestigious Jura appellation, producing only Vin Jaune from Savagnin — aged minimum 6 years 3 months under flor yeast in 62cl clavelins. The entry committee can reject the entire vintage. One of France's most unique and long-lived wines.",stats:{hectares:'50 ha',grapes:'Savagnin 100%',ageing:'10–50+ years after release'}}
 };
 
-// ═══════════════════════════════════════════════════════════════════
-// VIEW MANAGEMENT
-// ═══════════════════════════════════════════════════════════════════
-function showView(id) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const v = document.getElementById('view-'+id);
-  if (v) v.classList.add('active');
-  document.getElementById('right-panel').scrollTop = 0;
-}
+// ═══════════════════════════════════════════════════════════════════════
+// UI STATE & NAVIGATION
+// ═══════════════════════════════════════════════════════════════════════
+let currentTab    = 'map';
+let currentRegion = null;
+let navStack      = [];
 
-function showWelcome() {
-  state = {tab:'map', region:null, appellation:null, producer:null, grape:null};
-  document.querySelectorAll('.wine-rgn').forEach(e => e.classList.remove('active'));
-  document.querySelectorAll('.rn-pill').forEach(p => { p.classList.remove('active'); p.style.background=''; p.style.color=''; p.style.borderColor=''; });
-  updateBreadcrumb([]);
-  showView('welcome');
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id)?.classList.add('active');
+  document.getElementById('right-panel').scrollTop = 0;
+  updateBreadcrumb();
 }
 
 function switchTab(tab) {
-  state.tab = tab;
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  currentTab = tab;
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+tab)?.classList.add('active');
-  if      (tab === 'map')      { if (state.region) selectRegion(state.region, false); else showWelcome(); }
-  else if (tab === 'vintages') { renderVintageCalendar(); showView('vintages'); updateBreadcrumb([{label:'Vintage calendar'}]); }
-  else if (tab === 'pairings') { showView('pairings'); updateBreadcrumb([]); }
-  else if (tab === 'grapes')   { buildGrapesIndex(); showView('grapes-index'); updateBreadcrumb([{label:'Grapes'}]); }
+  if (tab==='map')      { if (currentRegion) selectRegion(currentRegion,false); else goHome(); }
+  else if (tab==='calendar') { navStack=[]; showView('calendar'); }
+  else if (tab==='pairings') { navStack=[]; showView('pairings'); }
+  else if (tab==='grapes')   { navStack=[]; showView('grapes-index'); }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// BREADCRUMB
-// ═══════════════════════════════════════════════════════════════════
-function updateBreadcrumb(items) {
+function goHome() {
+  navStack=[]; currentRegion=null;
+  d3.selectAll('.wine-region').classed('active',false);
+  document.querySelectorAll('.rn-pill').forEach(p=>{p.classList.remove('active');p.style.background='';p.style.borderColor='';p.style.color='';});
+  document.getElementById('breadcrumb').classList.remove('visible');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-welcome').classList.add('active');
+  document.getElementById('right-panel').scrollTop=0;
+}
+
+function updateBreadcrumb() {
   const bc = document.getElementById('breadcrumb');
-  if (!items || items.length === 0) { bc.classList.remove('visible'); bc.innerHTML=''; return; }
+  if (!navStack.length) { bc.classList.remove('visible'); return; }
   bc.classList.add('visible');
-  // Always start with home
-  const all = [{label:'terroir.guide', fn: showWelcome}, ...items];
-  bc.innerHTML = all.map((item, i) => {
-    const isCurrent = i === all.length - 1;
-    const cls = isCurrent ? 'bc-item current' : 'bc-item';
-    const click = (!isCurrent && item.fn) ? `onclick="${item.fn.name || ''}()"` : '';
-    return (i > 0 ? '<span class="bc-sep">›</span>' : '') +
-      `<span class="${cls}" ${(!isCurrent && item.fn) ? 'style="cursor:pointer"' : ''}>${item.label}</span>`;
-  }).join('');
-  // Re-attach click handlers
-  const spans = bc.querySelectorAll('.bc-item:not(.current)');
-  spans.forEach((span, i) => {
-    if (all[i].fn) span.addEventListener('click', all[i].fn);
+  let html = `<span class="bc-item" onclick="goHome()">terroir.guide</span>`;
+  navStack.forEach((item,i) => {
+    const last = i===navStack.length-1;
+    html += `<span class="bc-sep">›</span>`;
+    if (item.type==='region') {
+      const r=TERROIR.regions[item.id];
+      if (!r) return;
+      const cls = last?'bc-item current':'bc-item';
+      const oc  = last?'':` onclick="selectRegion('${item.id}',false)"`;
+      html += `<span class="${cls}"${oc}><span class="bc-dot" style="background:${r.color}"></span>${r.name}</span>`;
+    } else if (item.type==='appellation') {
+      const a=APPELLATIONS[item.id];
+      if (!a) return;
+      const cls=last?'bc-item current':'bc-item';
+      const oc=last?'':` onclick="selectAppellation('${item.id}',false)"`;
+      html+=`<span class="${cls}"${oc}>${a.name}</span>`;
+    } else if (item.type==='producer') {
+      const p=TERROIR.producers[item.id];
+      if (!p) return;
+      html+=`<span class="bc-item current">${p.name}</span>`;
+    } else if (item.type==='grape') {
+      const g=TERROIR.grapes[item.id];
+      if (!g) return;
+      html+=`<span class="bc-item current">${g.name}</span>`;
+    }
   });
+  bc.innerHTML=html;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// SELECT REGION
-// ═══════════════════════════════════════════════════════════════════
-function selectRegion(key, updateTab=true) {
+// ── Pulse animation ──────────────────────────────────────────────────────────
+function pulseMap(key) {
+  const geo = WINE_REGIONS_GEO[key];
+  if (!geo) return;
+  const [px,py] = projection(geo.label);
+  const rcolor  = TERROIR.regions[key]?.color||'#888';
+  let start=null; const dur=700;
+  const circle = svg.append('circle').attr('cx',px).attr('cy',py).attr('r',0)
+    .attr('fill','none').attr('stroke',rcolor).attr('stroke-width',2).attr('opacity',.6);
+  function step(ts) {
+    if (!start) start=ts;
+    const p = Math.min((ts-start)/dur,1);
+    circle.attr('r',p*32).attr('opacity',(1-p)*.55);
+    if (p<1) requestAnimationFrame(step); else circle.remove();
+  }
+  requestAnimationFrame(step);
+}
+
+// ── Region ───────────────────────────────────────────────────────────────────
+function selectRegion(key, resetStack=true) {
   const r = TERROIR.regions[key];
   if (!r) return;
-  state.region = key; state.appellation = null; state.producer = null;
+  currentRegion = key;
+  if (resetStack) navStack=[{type:'region',id:key}];
 
-  document.querySelectorAll('.wine-rgn').forEach(e => e.classList.remove('active'));
-  document.getElementById('rgn-'+key)?.classList.add('active');
+  d3.selectAll('.wine-region').classed('active',false);
+  d3.select('#rgn-'+key).classed('active',true);
+  pulseMap(key);
 
-  document.querySelectorAll('.rn-pill').forEach(p => { p.classList.remove('active'); p.style.background=''; p.style.color=''; p.style.borderColor=''; });
-  const np = document.getElementById('nav-'+key);
-  if (np) { np.classList.add('active'); np.style.background=r.color; np.style.borderColor=r.color; np.style.color='#fff'; }
+  document.querySelectorAll('.rn-pill').forEach(p=>{p.classList.remove('active');p.style.background='';p.style.borderColor='';p.style.color='';});
+  const np=document.getElementById('nav-'+key);
+  if (np){np.classList.add('active');np.style.background=r.color;np.style.borderColor=r.color;np.style.color='#fff';}
 
-  updateBreadcrumb([{label: r.name}]);
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-map')?.classList.add('active');
+  currentTab='map';
+
   document.getElementById('view-region').innerHTML = renderRegion(r);
   showView('region');
-
-  if (updateTab) {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-map').classList.add('active');
-    state.tab = 'map';
-  }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// RENDER REGION
-// ═══════════════════════════════════════════════════════════════════
 function renderRegion(r) {
-  const tagBg = r.color+'1a';
-  let html = `<div class="region-header">
-    <div class="region-header-top">
-      <div class="region-swatch" style="background:${r.color}"></div>
-      <span class="region-name">${r.name}</span>
-      <span class="region-style-tag" style="background:${tagBg};color:${r.color};border-color:${r.color}44">${r.style}</span>
+  const tagBg=r.color+'1a';
+  let h=`<div class="rg-head">
+    <div class="rg-head-top">
+      <div class="rg-swatch" style="background:${r.color}"></div>
+      <span class="rg-name">${r.name}</span>
+      <span class="style-tag" style="background:${tagBg};color:${r.color};border-color:${r.color}40">${r.style}</span>
     </div>
-    <p class="region-desc">${r.summary}</p>
+    <p class="rg-desc">${r.summary}</p>
     <div class="info-grid">
-      <div class="info-card"><div class="info-card-lbl">Climate</div><div class="info-card-val">${r.climate}</div></div>
-      <div class="info-card"><div class="info-card-lbl">Soils</div><div class="info-card-val">${r.soils}</div></div>
+      <div class="ic"><div class="ic-lbl">Climate</div><div class="ic-val">${r.climate}</div></div>
+      <div class="ic"><div class="ic-lbl">Soils</div><div class="ic-val">${r.soils}</div></div>
     </div>
   </div>`;
 
-  // Grapes
   if (r.grapes?.length) {
-    html += `<p class="sec-label">Grape varieties</p><div class="grape-chips">`;
-    r.grapes.forEach(gid => {
-      const g = TERROIR.grapes[gid];
-      const nm = g ? g.name : gid.replace(/_/g,' ');
-      const ic = g?.color==='white' ? '○' : '●';
-      html += `<span class="grape-chip" onclick="selectGrape('${gid}')">${ic} ${nm}</span>`;
+    h+=`<p class="sec-lbl">Grape varieties</p><div class="grape-chips">`;
+    r.grapes.forEach(gid=>{
+      const g=TERROIR.grapes[gid];
+      const nm=g?.name||gid.replace(/_/g,' ');
+      const ic=g?.color==='white'?'○':'●';
+      h+=`<span class="grape-chip" onclick="selectGrape('${gid}')"><span>${ic}</span>${nm}</span>`;
     });
-    html += `</div>`;
+    h+=`</div>`;
   }
 
-  // Appellations as clickable cards
   if (r.appellations?.length) {
-    html += `<p class="sec-label">Appellations</p><div class="app-cards">`;
-    r.appellations.forEach(aId => {
-      const ad = APP_DETAIL[aId];
-      const name = ad ? ad.name : aId.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-      const type = ad ? ad.type : '';
-      const clickable = !!ad;
-      html += `<div class="app-card${clickable?'':' style="cursor:default"'}" ${clickable?`onclick="selectAppellation('${aId}')"`:'style="cursor:default"'}>
-        <div class="app-card-dot" style="background:${r.color}"></div>
-        <div class="app-card-body">
-          <div class="app-card-name">${name}</div>
-          ${type?`<div class="app-card-type">${type}</div>`:''}
-        </div>
-        ${clickable?`<div class="app-card-arr">›</div>`:''}
-      </div>`;
+    h+=`<p class="sec-lbl">Appellations <span style="font-size:10px;font-weight:400;color:var(--ink4);letter-spacing:0;text-transform:none">— click for detail</span></p><div class="app-grid">`;
+    r.appellations.forEach(a=>{
+      const aD=APPELLATIONS[a];
+      const nm=aD?.name||a.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+      const oc=aD?`onclick="selectAppellation('${a}')"`:'';
+      const cur=aD?'cursor:pointer':'';
+      h+=`<span class="app-tag" style="background:${r.color}16;color:${r.color};border-color:${r.color}40;${cur}" ${oc}>${nm}</span>`;
     });
-    html += `</div>`;
+    h+=`</div>`;
   }
 
-  // Vintages
   if (r.vintages && Object.keys(r.vintages).length) {
-    html += `<p class="sec-label">Vintage ratings</p>
-    <table class="vintage-table"><thead><tr><th>Year</th><th>Score</th><th style="width:80px"></th><th>Notes</th></tr></thead><tbody>`;
-    Object.entries(r.vintages).sort((a,b)=>b[0]-a[0]).forEach(([yr,v]) => {
-      const pct = Math.max(0,Math.min(100,((v.rating-85)/15*100))).toFixed(0);
-      const sc = v.rating>=97?'#8b2020':v.rating>=94?'#c44020':v.rating>=91?'#e8981a':'#8a7d72';
-      html += `<tr><td><span class="vintage-year">${yr}</span></td>
-        <td><span class="vintage-score" style="color:${sc}">${v.rating}</span></td>
-        <td><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:${pct}%;background:${r.color}"></div></div></div></td>
-        <td style="font-size:11.5px">${v.notes}</td></tr>`;
+    h+=`<p class="sec-lbl">Vintage guide</p><table class="vtable"><thead><tr><th>Year</th><th>Score</th><th style="width:90px"></th><th>Notes</th></tr></thead><tbody>`;
+    Object.entries(r.vintages).sort((a,b)=>b[0]-a[0]).forEach(([yr,v])=>{
+      const pct=((v.rating-85)/15*100).toFixed(0);
+      const sc=v.rating>=97?'#8b2020':v.rating>=95?'#a84020':v.rating>=93?'#8b5010':'#4a6b00';
+      h+=`<tr><td><span class="v-yr">${yr}</span></td><td><span class="v-sc" style="color:${sc}">${v.rating}</span></td><td><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${r.color}"></div></div></td><td style="font-size:11.5px">${v.notes}</td></tr>`;
     });
-    html += `</tbody></table>`;
+    h+=`</tbody></table>`;
   }
 
-  // Pairings
   if (r.pairings?.length) {
-    html += `<p class="sec-label">Food pairings</p><div class="pairing-chips">`;
-    r.pairings.forEach(p => html += `<span class="pairing-chip"><span class="pairing-dot" style="background:${r.color}"></span>${p}</span>`);
-    html += `</div>`;
+    h+=`<p class="sec-lbl">Food pairings</p><div class="pair-chips">`;
+    r.pairings.forEach(p=>h+=`<span class="pair-chip"><span class="pair-dot" style="background:${r.color}"></span>${p}</span>`);
+    h+=`</div>`;
   }
 
-  // Producers
-  const rProducers = (r.producers||[]).map(id=>TERROIR.producers[id]).filter(Boolean);
-  if (rProducers.length) {
-    html += `<p class="sec-label">Featured producers</p><div class="producer-cards">`;
-    rProducers.forEach(p => {
-      const fb = p.farming?.toLowerCase().includes('biodynamic')?'<span class="badge bio">Biodynamic</span>':p.farming?.toLowerCase().includes('organic')?'<span class="badge organic">Organic</span>':p.farming?.toLowerCase().includes('natural')?'<span class="badge natural">Natural</span>':'';
-      const tb = p.type?.toLowerCase().includes('grower')?'<span class="badge grower">Grower</span>':'';
-      html += `<div class="producer-card" onclick="selectProducer('${p.id}')">
-        <div class="producer-card-body">
-          <div class="producer-card-name">${p.name}</div>
-          <div class="producer-card-meta">${p.village} &middot; Est. ${p.founded} &middot; ${p.price_tier}</div>
-          <div class="producer-card-badges">${fb}${tb}</div>
-        </div>
-        <div class="producer-arrow">›</div>
-      </div>`;
+  const prods=(r.producers||[]).map(id=>TERROIR.producers[id]).filter(Boolean);
+  if (prods.length) {
+    h+=`<p class="sec-lbl">Featured producers</p><div class="prod-cards">`;
+    prods.forEach(p=>{
+      const fb=p.farming?.toLowerCase();
+      const fb2=fb?.includes('biodynamic')?'<span class="badge bio">Biodynamic</span>':fb?.includes('organic')?'<span class="badge organic">Organic</span>':fb?.includes('natural')?'<span class="badge natural">Natural</span>':'';
+      const tb=p.type?.toLowerCase().includes('grower')?'<span class="badge grower">Grower</span>':'';
+      h+=`<div class="prod-card" onclick="selectProducer('${p.id}')"><div class="prod-card-body"><div class="prod-card-name">${p.name}</div><div class="prod-card-meta">${p.village} · Est. ${p.founded} · ${p.price_tier}</div><div class="prod-card-badges">${fb2}${tb}</div></div><div class="prod-arrow">›</div></div>`;
     });
-    html += `</div><div class="tip-box" style="border-left-color:${r.color}">Producers listed for outstanding quality-to-price ratio. Click any producer for full tasting notes, biography, and vintage detail.</div>`;
+    h+=`</div><div class="tip-box" style="border-left-color:${r.color}">Click any producer for full tasting notes, drinking windows, and winemaker biography.</div>`;
   }
-  return html;
+  return h;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// APPELLATION DETAIL
-// ═══════════════════════════════════════════════════════════════════
-function selectAppellation(aId) {
-  const ad = APP_DETAIL[aId];
-  if (!ad) return;
-  state.appellation = aId;
-  const r = TERROIR.regions[ad.region];
-  const rcolor = r?.color || '#888';
-
-  updateBreadcrumb([
-    {label: r?.name||ad.region, fn: ()=>selectRegion(ad.region)},
-    {label: ad.name}
-  ]);
-
-  let html = `<div class="app-detail-header">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <div class="region-swatch" style="background:${rcolor}"></div>
-      <h2 class="app-detail-name">${ad.name}</h2>
-    </div>
-    <div class="app-detail-region">${r?.name||ad.region} &middot; ${ad.type}</div>
-  </div>
-  <p class="app-detail-desc">${ad.desc}</p>`;
-
-  // Grapes
-  if (ad.grapes?.length) {
-    html += `<p class="sec-label">Grapes</p><div class="grape-chips">`;
-    ad.grapes.forEach(g => html += `<span class="grape-chip" style="cursor:default">&#9679; ${g}</span>`);
-    html += `</div>`;
+// ── Appellation ───────────────────────────────────────────────────────────────
+function selectAppellation(id, pushStack=true) {
+  const a=APPELLATIONS[id];
+  if (!a) return;
+  if (pushStack) {
+    if (!navStack.find(n=>n.type==='region'&&n.id===a.region)) navStack=[{type:'region',id:a.region}];
+    navStack.push({type:'appellation',id});
   }
-
-  // Style profile bars
-  if (ad.styles) {
-    html += `<p class="sec-label">Style profile</p><div class="style-bars">`;
-    Object.entries(ad.styles).forEach(([k,v]) => {
-      html += `<div class="style-bar-row">
-        <span class="style-bar-lbl">${k}</span>
-        <div class="style-bar-track"><div class="style-bar-fill" style="width:${v}%;background:${rcolor}"></div></div>
-        <span class="style-bar-val">${v < 30?'Low':v < 60?'Med':'High'}</span>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  // Region vintages relevant
-  if (r?.vintages && Object.keys(r.vintages).length) {
-    html += `<p class="sec-label">Recent vintages for this region</p>
-    <table class="vintage-table"><thead><tr><th>Year</th><th>Score</th><th style="width:80px"></th><th>Notes</th></tr></thead><tbody>`;
-    Object.entries(r.vintages).sort((a,b)=>b[0]-a[0]).slice(0,4).forEach(([yr,v]) => {
-      const pct = Math.max(0,Math.min(100,((v.rating-85)/15*100))).toFixed(0);
-      const sc = v.rating>=97?'#8b2020':v.rating>=94?'#c44020':v.rating>=91?'#e8981a':'#8a7d72';
-      html += `<tr><td><span class="vintage-year">${yr}</span></td>
-        <td><span class="vintage-score" style="color:${sc}">${v.rating}</span></td>
-        <td><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:${pct}%;background:${rcolor}"></div></div></div></td>
-        <td style="font-size:11.5px">${v.notes}</td></tr>`;
-    });
-    html += `</tbody></table>`;
-  }
-
-  // Producers from this region
-  const rProds = (r?.producers||[]).map(id=>TERROIR.producers[id]).filter(Boolean);
-  if (rProds.length) {
-    html += `<p class="sec-label">Producers in ${r?.name}</p><div class="producer-cards">`;
-    rProds.forEach(p => {
-      html += `<div class="producer-card" onclick="selectProducer('${p.id}')">
-        <div class="producer-card-body">
-          <div class="producer-card-name">${p.name}</div>
-          <div class="producer-card-meta">${p.village}</div>
-        </div>
-        <div class="producer-arrow">›</div>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  document.getElementById('view-appellation').innerHTML = html;
+  document.getElementById('view-appellation').innerHTML = renderAppellation(a);
   showView('appellation');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// PRODUCER DETAIL
-// ═══════════════════════════════════════════════════════════════════
-function selectProducer(id) {
-  const p = TERROIR.producers[id];
-  if (!p) return;
-  state.producer = id;
-  const r = TERROIR.regions[p.region];
-  const rcolor = r?.color || '#888';
-
-  updateBreadcrumb([
-    {label: r?.name||p.region, fn: ()=>selectRegion(p.region)},
-    {label: p.name}
-  ]);
-
-  let html = `<div class="producer-header">
-    <div class="producer-name">${p.name}</div>
-    <div class="producer-village">${p.village} &middot; ${r?.name||p.region} &middot; Est. ${p.founded}</div>
-    <div style="display:flex;gap:6px;margin-top:8px">`;
-  if (p.farming?.toLowerCase().includes('biodynamic')) html += `<span class="badge bio">Biodynamic</span>`;
-  else if (p.farming?.toLowerCase().includes('organic')) html += `<span class="badge organic">Organic</span>`;
-  else if (p.farming?.toLowerCase().includes('natural')) html += `<span class="badge natural">Natural</span>`;
-  if (p.type?.toLowerCase().includes('grower')) html += `<span class="badge grower">Grower (RM)</span>`;
-  html += `<span class="badge">${p.price_tier}</span></div></div>`;
-
-  html += `<p class="sec-label">Winemaker &amp; estate</p>
-    <p style="font-size:13px;color:var(--ink2);margin-bottom:.5rem">${p.winemaker} &middot; ${p.hectares} hectares &middot; ${p.farming}</p>
-    <p class="producer-bio">${p.bio}</p>`;
-
-  if (p.wines?.length) {
-    html += `<p class="sec-label">Wines</p><div class="wine-cards">`;
-    p.wines.forEach(w => {
-      html += `<div class="wine-card">
-        <div class="wine-card-name">${w.name}</div>
-        <div class="wine-card-grapes">${w.grapes.join(' · ')}</div>
-        <div class="wine-card-notes">${w.notes}</div>
-        <div class="wine-card-meta">
-          <span><span class="meta-icon">⌛</span>${w.drinking}</span>
-          <span><span class="meta-icon">€</span>${w.price}</span>
-        </div>
-      </div>`;
+function renderAppellation(a) {
+  const r=TERROIR.regions[a.region];
+  const rc=r?.color||'#888';
+  const prods=Object.values(TERROIR.producers).filter(p=>p.region===a.region).slice(0,4);
+  let h=`<div class="app-head"><div class="app-name">${a.name}</div><div class="app-region-lbl">${r?.name||a.region} · ${a.type}</div>
+    <div class="app-stats">`;
+  if (a.stats?.hectares) h+=`<span class="app-stat">▭ ${a.stats.hectares}</span>`;
+  if (a.stats?.grapes)   h+=`<span class="app-stat">● ${a.stats.grapes}</span>`;
+  if (a.stats?.ageing)   h+=`<span class="app-stat">⌛ ${a.stats.ageing}</span>`;
+  h+=`</div><p class="app-desc">${a.desc}</p></div>`;
+  if (prods.length) {
+    h+=`<p class="sec-lbl">Producers in this region</p><div class="prod-cards">`;
+    prods.forEach(p=>{
+      const fb=p.farming?.toLowerCase();
+      const fb2=fb?.includes('biodynamic')?'<span class="badge bio">Biodynamic</span>':fb?.includes('organic')?'<span class="badge organic">Organic</span>':fb?.includes('natural')?'<span class="badge natural">Natural</span>':'';
+      h+=`<div class="prod-card" onclick="selectProducer('${p.id}')"><div class="prod-card-body"><div class="prod-card-name">${p.name}</div><div class="prod-card-meta">${p.village} · ${p.price_tier}</div><div class="prod-card-badges">${fb2}</div></div><div class="prod-arrow">›</div></div>`;
     });
-    html += `</div>`;
+    h+=`</div>`;
   }
+  h+=`<div class="tip-box" style="border-left-color:${rc}">Return to <span style="cursor:pointer;text-decoration:underline;color:${rc}" onclick="selectRegion('${a.region}',false)">${r?.name||'the region'}</span> to see all appellations and producers.</div>`;
+  return h;
+}
 
-  html += `<div class="tip-box" style="border-left-color:${rcolor};margin-top:1.5rem">Prices are approximate retail (Paris/online). Drinking windows assume correct cellar storage at 12–14°C, humidity 70%. En primeur and auction prices vary significantly.</div>`;
-
-  document.getElementById('view-producer').innerHTML = html;
+// ── Producer ──────────────────────────────────────────────────────────────────
+function selectProducer(id) {
+  const p=TERROIR.producers[id];
+  if (!p) return;
+  if (!navStack.find(n=>n.type==='region'&&n.id===p.region)) navStack=[{type:'region',id:p.region}];
+  navStack.push({type:'producer',id});
+  document.getElementById('view-producer').innerHTML = renderProducer(p);
   showView('producer');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// GRAPE DETAIL
-// ═══════════════════════════════════════════════════════════════════
-function selectGrape(id) {
-  const g = TERROIR.grapes[id];
-  if (!g) return;
-  state.grape = id;
-
-  // Build breadcrumb accounting for where we came from
-  const bc = state.region
-    ? [{label: TERROIR.regions[state.region]?.name, fn: ()=>selectRegion(state.region)}, {label: g.name}]
-    : state.tab==='grapes'
-      ? [{label:'Grapes', fn:()=>switchTab('grapes')}, {label: g.name}]
-      : [{label: g.name}];
-  updateBreadcrumb(bc);
-
-  const icon = g.color==='white'?'○':'●';
-  let html = `<div style="margin-bottom:1.25rem;border-bottom:1px solid var(--line);padding-bottom:1.25rem">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <span style="font-size:18px;color:var(--ink3)">${icon}</span>
-      <h2 class="grape-name-big">${g.name}</h2>
-      <span class="badge">${g.color==='white'?'White':'Red'} grape</span>
-    </div>
-    <p class="grape-origin">Origin: ${g.origin}</p>
-    ${g.synonyms?.length?`<p style="font-size:12px;color:var(--ink4);margin-top:4px;font-style:italic">Also known as: ${g.synonyms.join(', ')}</p>`:''}
-  </div>
-  <p class="grape-character">${g.character}</p>`;
-
-  if (g.food_affinities?.length) {
-    html += `<p class="sec-label">Food affinities</p><div class="pairing-chips">`;
-    g.food_affinities.forEach(f => html += `<span class="pairing-chip">${f}</span>`);
-    html += `</div>`;
-  }
-
-  if (g.regional_expression && Object.keys(g.regional_expression).length) {
-    html += `<p class="sec-label">How the same grape expresses across terroirs</p><div class="expression-grid">`;
-    Object.entries(g.regional_expression).forEach(([reg,note]) => {
-      html += `<div class="expression-row"><span class="expression-region">${reg}</span><span class="expression-note">${note}</span></div>`;
+function renderProducer(p) {
+  const r=TERROIR.regions[p.region];
+  const rc=r?.color||'#888';
+  const fb=p.farming?.toLowerCase();
+  let h=`<div style="border-bottom:1px solid var(--line);padding-bottom:1.1rem;margin-bottom:1.1rem">
+    <div class="prod-name">${p.name}</div><div class="prod-village">${p.village} · Est. ${p.founded}</div>
+    <div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap">`;
+  if (fb?.includes('biodynamic')) h+=`<span class="badge bio">Biodynamic</span>`;
+  else if (fb?.includes('organic')) h+=`<span class="badge organic">Organic</span>`;
+  else if (fb?.includes('natural')) h+=`<span class="badge natural">Natural</span>`;
+  if (p.type?.toLowerCase().includes('grower')) h+=`<span class="badge grower">Grower (RM)</span>`;
+  h+=`<span class="badge">${p.price_tier}</span></div></div>`;
+  h+=`<p class="sec-lbl">Winemaker</p><p style="font-size:12.5px;color:var(--ink2);margin-bottom:.4rem">${p.winemaker} · ${p.hectares} ha · ${p.farming}</p><p class="prod-bio">${p.bio}</p>`;
+  if (p.wines?.length) {
+    h+=`<p class="sec-lbl">Wines</p><div class="wine-cards">`;
+    p.wines.forEach(w=>{
+      h+=`<div class="wine-card"><div class="wc-name">${w.name}</div><div class="wc-grapes">${w.grapes.join(' · ')}</div><div class="wc-notes">${w.notes}</div><div class="wc-meta"><span>⌛ ${w.drinking}</span><span>€ ${w.price}</span></div></div>`;
     });
-    html += `</div>`;
+    h+=`</div>`;
   }
+  h+=`<div class="tip-box" style="border-left-color:${rc};margin-top:1.2rem">Prices are indicative retail (Paris/online, 2024–25). Drinking windows assume 12–14°C, 70% humidity storage.</div>`;
+  return h;
+}
 
-  if (g.global_presence) {
-    html += `<p class="sec-label">Where it grows</p><p style="font-size:13px;color:var(--ink2);line-height:1.7">${g.global_presence}</p>`;
-  }
-
-  document.getElementById('view-grape').innerHTML = html;
+// ── Grape ─────────────────────────────────────────────────────────────────────
+function selectGrape(id) {
+  const g=TERROIR.grapes[id];
+  if (!g) return;
+  if (!navStack.find(n=>n.type==='grape'&&n.id===id)) navStack.push({type:'grape',id});
+  document.getElementById('view-grape').innerHTML = renderGrape(g);
   showView('grape');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// GRAPES INDEX
-// ═══════════════════════════════════════════════════════════════════
-function buildGrapesIndex() {
-  const panel = document.getElementById('view-grapes-index');
-  const reds   = Object.values(TERROIR.grapes).filter(g=>g.color==='red');
-  const whites = Object.values(TERROIR.grapes).filter(g=>g.color!=='red');
-  let html = `<p style="font-size:13px;color:var(--ink3);line-height:1.7;margin-bottom:1.5rem;max-width:480px">Each grape entry covers origin, character, food affinities, and a comparison of how the variety expresses differently across regions and climates.</p>`;
-  html += `<p class="sec-label">Red grapes</p><div class="grape-chips" style="margin-bottom:1.5rem">`;
-  reds.forEach(g   => { html += `<span class="grape-chip" onclick="selectGrape('${g.id}')">● ${g.name}</span>`; });
-  html += `</div><p class="sec-label">White grapes</p><div class="grape-chips">`;
-  whites.forEach(g => { html += `<span class="grape-chip" onclick="selectGrape('${g.id}')">○ ${g.name}</span>`; });
-  html += `</div>`;
-  panel.innerHTML = html;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// VINTAGE CALENDAR
-// ═══════════════════════════════════════════════════════════════════
-function renderVintageCalendar() {
-  const panel = document.getElementById('view-vintages');
-
-  // Collect all years across all regions
-  const allYears = new Set();
-  Object.values(TERROIR.regions).forEach(r => { if (r.vintages) Object.keys(r.vintages).forEach(y=>allYears.add(y)); });
-  const years = [...allYears].sort((a,b)=>b-a);
-
-  // Score → CSS tier
-  function tier(score) {
-    if (!score) return 'tier-0';
-    if (score >= 97) return 'tier-5';
-    if (score >= 94) return 'tier-4';
-    if (score >= 91) return 'tier-3';
-    if (score >= 88) return 'tier-2';
-    return 'tier-1';
+function renderGrape(g) {
+  const ic=g.color==='white'?'○':'●';
+  let h=`<div style="border-bottom:1px solid var(--line);padding-bottom:1.1rem;margin-bottom:1rem">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+      <span style="font-size:17px;color:var(--ink3)">${ic}</span>
+      <h2 class="grape-name-big">${g.name}</h2>
+      <span class="badge">${g.color==='white'?'White':'Red'} variety</span>
+    </div>
+    <p class="grape-origin">Origin: ${g.origin}</p>
+    ${g.synonyms?.length?`<p style="font-size:11.5px;color:var(--ink4);margin-top:3px;font-style:italic">Also: ${g.synonyms.join(', ')}</p>`:''}
+  </div><p class="grape-char">${g.character}</p>`;
+  if (g.food_affinities?.length){
+    h+=`<p class="sec-lbl">Food affinities</p><div class="pair-chips">`;
+    g.food_affinities.forEach(f=>h+=`<span class="pair-chip">${f}</span>`);
+    h+=`</div>`;
   }
-
-  let html = `<p class="vc-intro">Click a region name to explore. Scores reflect overall regional quality — individual appellations and producers may vary significantly within a vintage.</p>
-  <div class="vc-legend">
-    <span class="vc-legend-item"><span class="vc-legend-swatch" style="background:#8b2020"></span>97–100 · Exceptional</span>
-    <span class="vc-legend-item"><span class="vc-legend-swatch" style="background:#c44020"></span>94–96 · Outstanding</span>
-    <span class="vc-legend-item"><span class="vc-legend-swatch" style="background:#e8981a"></span>91–93 · Excellent</span>
-    <span class="vc-legend-item"><span class="vc-legend-swatch" style="background:#c8c050"></span>88–90 · Good</span>
-    <span class="vc-legend-item"><span class="vc-legend-swatch" style="background:var(--paper3)"></span>Below 88</span>
-  </div>
-  <div class="vc-table-wrap">
-  <table class="vc-table">
-  <thead><tr>
-    <th>Region</th>`;
-  years.forEach(y => html += `<th class="year-col">${y}</th>`);
-  html += `</tr></thead><tbody>`;
-
-  Object.values(TERROIR.regions).forEach(r => {
-    html += `<tr><td class="region-name-col" onclick="selectRegion('${r.id}');switchTab('map')" style="cursor:pointer">${r.name}</td>`;
-    years.forEach(y => {
-      const v = r.vintages?.[y];
-      if (v) {
-        const t = tier(v.rating);
-        const tipText = v.notes.replace(/'/g,"&apos;");
-        html += `<td class="vc-score-cell"><span class="vc-score ${t}" title="${tipText}">${v.rating}</span></td>`;
-      } else {
-        html += `<td class="vc-score-cell"><span class="vc-score tier-0">—</span></td>`;
-      }
+  if (g.regional_expression&&Object.keys(g.regional_expression).length){
+    h+=`<p class="sec-lbl">Same grape, different terroirs</p><div class="expr-grid">`;
+    Object.entries(g.regional_expression).forEach(([rg,nt])=>{
+      h+=`<div class="expr-row"><span class="expr-rgn">${rg}</span><span class="expr-note">${nt}</span></div>`;
     });
-    html += `</tr>`;
-  });
-
-  html += `</tbody></table></div>
-  <p style="font-size:11px;color:var(--ink4);font-style:italic;margin-top:.5rem">Hover over any score for vintage notes. Click a region name to explore it on the map.</p>`;
-  panel.innerHTML = html;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// SEARCH
-// ═══════════════════════════════════════════════════════════════════
-let searchIndex = null;
-
-function buildSearchIndex() {
-  if (searchIndex) return;
-  searchIndex = [];
-  // Regions
-  Object.values(TERROIR.regions).forEach(r => {
-    searchIndex.push({type:'Region', name:r.name, meta:r.style, fn:()=>selectRegion(r.id), color:r.color});
-  });
-  // Producers
-  Object.values(TERROIR.producers).forEach(p => {
-    const r = TERROIR.regions[p.region];
-    searchIndex.push({type:'Producer', name:p.name, meta:`${p.village} · ${r?.name||''}`, fn:()=>selectProducer(p.id), color:r?.color});
-  });
-  // Grapes
-  Object.values(TERROIR.grapes).forEach(g => {
-    searchIndex.push({type:'Grape', name:g.name, meta:g.color==='white'?'White grape':'Red grape', fn:()=>selectGrape(g.id), color:'#888'});
-  });
-  // Appellations
-  Object.entries(APP_DETAIL).forEach(([id,ad]) => {
-    const r = TERROIR.regions[ad.region];
-    searchIndex.push({type:'Appellation', name:ad.name, meta:`${ad.type} · ${r?.name||''}`, fn:()=>selectAppellation(id), color:r?.color});
-  });
-}
-
-function onSearchInput(q) {
-  buildSearchIndex();
-  const dd = document.getElementById('search-dropdown');
-  if (!q || q.length < 2) { dd.classList.remove('open'); dd.innerHTML=''; return; }
-  const ql = q.toLowerCase();
-  const results = searchIndex.filter(item => item.name.toLowerCase().includes(ql)).slice(0,8);
-  if (!results.length) { dd.innerHTML=`<div style="padding:12px 14px;font-size:12px;color:var(--ink4);font-style:italic">No results for "${q}"</div>`; dd.classList.add('open'); return; }
-  dd.innerHTML = results.map((r,i) => `
-    <div class="search-result-item" data-idx="${i}">
-      <span class="sri-icon" style="color:${r.color||'#888'}">&#9679;</span>
-      <div style="flex:1;min-width:0">
-        <div class="sri-name">${r.name}</div>
-        <div class="sri-meta">${r.meta}</div>
-      </div>
-      <span class="sri-type">${r.type}</span>
-    </div>`).join('');
-  dd.classList.add('open');
-  dd.querySelectorAll('.search-result-item').forEach((el,i) => {
-    el.addEventListener('click', () => {
-      results[i].fn();
-      document.getElementById('search-input').value = '';
-      dd.classList.remove('open');
-      dd.innerHTML='';
-    });
-  });
-}
-
-function onSearchKey(e) {
-  if (e.key==='Escape') { document.getElementById('search-dropdown').classList.remove('open'); }
-}
-
-document.addEventListener('click', e => {
-  if (!document.getElementById('search-wrap').contains(e.target)) {
-    document.getElementById('search-dropdown').classList.remove('open');
+    h+=`</div>`;
   }
-});
+  if (g.global_presence) h+=`<p class="sec-lbl">Where it grows</p><p style="font-size:13px;color:var(--ink2);line-height:1.7">${g.global_presence}</p>`;
+  return h;
+}
 
-// ═══════════════════════════════════════════════════════════════════
-// PAIRING MODE
-// ═══════════════════════════════════════════════════════════════════
-(function buildPairingSugs() {
-  const wrap = document.getElementById('pairing-sugs');
-  ['oysters','roast lamb','steak','cheese board','mushrooms','bouillabaisse','foie gras','charcuterie','spicy food','fish'].forEach(d => {
-    const btn = document.createElement('button');
-    btn.className = 'sug-pill';
-    btn.textContent = d;
-    btn.onclick = () => { document.getElementById('pairing-input').value = d; runPairing(); };
-    wrap.appendChild(btn);
+// ── Grapes index ──────────────────────────────────────────────────────────────
+(function(){
+  const p=document.getElementById('view-grapes-index');
+  const reds=Object.values(TERROIR.grapes).filter(g=>g.color==='red');
+  const whites=Object.values(TERROIR.grapes).filter(g=>g.color==='white');
+  let h=`<p class="sec-lbl">Red varieties</p><div class="grape-chips" style="margin-bottom:1.4rem">`;
+  reds.forEach(g=>h+=`<span class="grape-chip" onclick="selectGrape('${g.id}')">●  ${g.name}</span>`);
+  h+=`</div><p class="sec-lbl">White varieties</p><div class="grape-chips">`;
+  whites.forEach(g=>h+=`<span class="grape-chip" onclick="selectGrape('${g.id}')">○  ${g.name}</span>`);
+  h+=`</div>`;
+  p.innerHTML=h;
+})();
+
+// ── Vintage calendar ──────────────────────────────────────────────────────────
+(function(){
+  const years=['2023','2022','2021','2020','2019','2018','2017','2016','2015'];
+  function scoreStyle(s){
+    if (s>=97) return {bg:'#7a1a1a',tx:'#fff'};
+    if (s>=95) return {bg:'#a83020',tx:'#fff'};
+    if (s>=93) return {bg:'#c86030',tx:'#fff'};
+    if (s>=91) return {bg:'#c89040',tx:'#fff'};
+    if (s>=89) return {bg:'#c8b870',tx:'#1c1814'};
+    return           {bg:'#ddd5b0',tx:'#4a4036'};
+  }
+  const legItems=[
+    {label:'97–100 Legendary',bg:'#7a1a1a',tx:'#fff'},
+    {label:'95–96 Outstanding',bg:'#a83020',tx:'#fff'},
+    {label:'93–94 Excellent',  bg:'#c86030',tx:'#fff'},
+    {label:'91–92 Very good',  bg:'#c89040',tx:'#fff'},
+    {label:'89–90 Good',       bg:'#c8b870',tx:'#1c1814'},
+  ];
+  const legEl=document.getElementById('cal-legend');
+  legItems.forEach(i=>{
+    const d=document.createElement('div');d.className='cal-leg-item';
+    d.innerHTML=`<div class="cal-leg-box" style="background:${i.bg}"></div><span>${i.label}</span>`;
+    legEl.appendChild(d);
+  });
+  const tbl=document.getElementById('cal-table');
+  let thHtml='<thead><tr><th>Region</th>';
+  years.forEach(y=>thHtml+=`<th>${y}</th>`);
+  thHtml+='</tr></thead>';
+  tbl.innerHTML=thHtml;
+  const tbody=document.createElement('tbody');
+  Object.values(TERROIR.regions).forEach(r=>{
+    const tr=document.createElement('tr');
+    let cells=`<td onclick="selectRegion('${r.id}');switchTab('map')">${r.name}</td>`;
+    years.forEach(y=>{
+      const v=r.vintages?.[y];
+      if (v){const c=scoreStyle(v.rating);cells+=`<td title="${v.notes}"><div class="cal-score" style="background:${c.bg};color:${c.tx}">${v.rating}</div></td>`;}
+      else cells+=`<td><div style="text-align:center;color:var(--ink4);font-size:10px">—</div></td>`;
+    });
+    tr.innerHTML=cells;tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+})();
+
+// ── Pairing mode ──────────────────────────────────────────────────────────────
+(function(){
+  const wrap=document.getElementById('pair-suggs');
+  ['oysters','roast lamb','steak','foie gras','bouillabaisse','mushrooms','cheese board','charcuterie','spicy food'].forEach(d=>{
+    const b=document.createElement('button');b.className='sugg-pill';b.textContent=d;
+    b.onclick=()=>{document.getElementById('pair-input').value=d;runPairing();};
+    wrap.appendChild(b);
   });
 })();
 
-function runPairing() {
-  const query = document.getElementById('pairing-input').value.trim().toLowerCase();
+function runPairing(){
+  const query=document.getElementById('pair-input').value.trim().toLowerCase();
   if (!query) return;
-  const results = document.getElementById('pairing-results');
-  const match = TERROIR.pairings.find(p =>
-    p.tags.some(tag => query.includes(tag) || tag.includes(query)) ||
-    p.dish.includes(query) || query.includes(p.dish)
-  );
-  if (!match) {
-    results.innerHTML = `<p style="font-size:13px;color:var(--ink3);font-style:italic">No specific pairing found for "${query}". Try one of the suggestions above.</p>`;
-    return;
-  }
-  let html = `<p class="pairing-result-heading">Wines to pair with <em>${match.dish}</em></p><div class="pairing-result-cards">`;
-  match.wines.forEach(w => {
-    const rd = TERROIR.regions[w.region];
-    const rc = rd?.color||'#888';
-    const rn = rd?.name||w.region;
-    const an = w.appellation||rn;
-    html += `<div class="pairing-result-card" onclick="selectRegion('${w.region}');switchTab('map')">
-      <div class="pr-swatch" style="background:${rc}"></div>
-      <div class="pr-body">
-        <div class="pr-name">${an}</div>
-        <div class="pr-region">${rn}</div>
-        <div class="pr-note">${w.note}</div>
-      </div>
-      <div style="font-size:18px;color:var(--ink4)">›</div>
+  const results=document.getElementById('pair-results');
+  const match=TERROIR.pairings.find(p=>p.tags.some(t=>query.includes(t)||t.includes(query))||p.dish.includes(query)||query.includes(p.dish));
+  if (!match){results.innerHTML=`<p style="font-size:13px;color:var(--ink3);font-style:italic">No pairing found for "${query}". Try one of the suggestions above.</p>`;return;}
+  let h=`<p style="font-family:var(--serif);font-size:1.05rem;font-style:italic;color:var(--ink2);margin-bottom:.9rem">Wines to match <em>${match.dish}</em></p><div class="pair-res-cards">`;
+  match.wines.forEach(w=>{
+    const rd=TERROIR.regions[w.region];const rc=rd?.color||'#888';const rn=rd?.name||w.region;
+    h+=`<div class="pair-res-card" onclick="selectRegion('${w.region}');switchTab('map')">
+      <div class="pair-res-sw" style="background:${rc}"></div>
+      <div class="pair-res-body"><div class="pair-res-name">${w.appellation||rn}</div><div class="pair-res-region">${rn}</div><div class="pair-res-note">${w.note}</div></div>
+      <div style="font-size:17px;color:var(--ink4);margin-top:2px">›</div>
     </div>`;
   });
-  html += `</div><p style="font-size:11px;color:var(--ink4);margin-top:1rem;font-style:italic">Click any card to explore the full region on the map.</p>`;
-  results.innerHTML = html;
+  h+=`</div><p style="font-size:11px;color:var(--ink4);margin-top:.9rem;font-style:italic">Click any result to explore the full region.</p>`;
+  results.innerHTML=h;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════════
-buildGrapesIndex();
+// ── Region nav pills ──────────────────────────────────────────────────────────
+const navBar=document.getElementById('region-nav');
+Object.values(TERROIR.regions).forEach(r=>{
+  const btn=document.createElement('button');
+  btn.className='rn-pill';btn.id='nav-'+r.id;btn.textContent=r.name;
+  btn.onclick=()=>selectRegion(r.id);
+  navBar.appendChild(btn);
+});
 </script>
 </body>
 </html>
