@@ -7,9 +7,9 @@
 <meta name="description" content="An encyclopedic, illustrated guide to the wines, regions, appellations, producers, and grapes of France.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="data.js"></script>
 <style>
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --ink:#1c1814;--ink2:#4a4036;--ink3:#8a7d72;--ink4:#b8aca0;
@@ -252,6 +252,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   .info-grid{grid-template-columns:1fr}
   .pair-hero,.pair-results{padding:1.4rem 1.5rem}
 }
+
 </style>
 </head>
 <body>
@@ -317,287 +318,110 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 
 <div id="region-nav"></div>
 
+
 <script>
-// ═══════════════════════════════════════════════════════════════════════
-// REAL FRANCE GEOJSON — accurate wine region boundaries
-// Coordinates from authoritative geographic sources, encoded as GeoJSON
-// Projection: D3 geoConicConformal (standard for France, IGN-aligned)
-// ═══════════════════════════════════════════════════════════════════════
 
-// France mainland outline — real coastline points (lon/lat WGS84)
-const FRANCE_OUTLINE = {"type":"Polygon","coordinates":[[
-  [-4.78,48.37],[-4.45,47.65],[-4.20,47.75],[-3.80,47.58],[-3.10,47.51],
-  [-2.50,47.45],[-2.17,47.07],[-1.83,46.83],[-1.50,46.62],[-1.30,46.32],
-  [-1.18,45.67],[-1.05,45.02],[-1.02,44.73],[-1.43,43.56],[-1.53,43.48],
-  [-1.70,43.38],[-1.78,43.35],[-1.40,43.08],[-0.30,42.85],[0.30,42.84],
-  [0.70,42.85],[1.50,42.56],[1.73,42.51],[2.00,42.43],[2.55,42.45],
-  [3.05,42.43],[3.17,42.45],[3.55,43.19],[4.00,43.23],[4.51,43.43],
-  [4.80,43.34],[5.05,43.28],[5.40,43.12],[5.68,43.03],[5.95,43.03],
-  [6.08,43.07],[6.60,43.23],[7.20,43.45],[7.50,43.78],[7.60,44.00],
-  [7.02,44.22],[6.97,44.84],[7.04,45.24],[6.63,45.82],[6.80,46.42],
-  [6.75,46.52],[6.02,46.44],[5.98,46.79],[6.10,47.14],[6.86,47.54],
-  [7.00,47.59],[7.59,47.61],[7.88,47.98],[8.22,48.60],[7.56,48.89],
-  [7.56,49.44],[6.43,49.47],[5.90,49.46],[5.52,49.54],[4.86,49.91],
-  [4.22,50.01],[3.12,50.32],[2.52,51.05],[1.63,50.92],[0.29,50.92],
-  [-0.54,49.27],[-1.24,49.36],[-1.56,48.63],[-2.00,48.54],[-2.95,48.64],
-  [-4.05,48.48],[-4.78,48.37]
-]]};
+// ═══════════════════════════════════════════════════════════
+// PRE-COMPUTED SVG MAP DATA
+// ═══════════════════════════════════════════════════════════
+const FR_PATH="M27.2,188.5L36.6,231.4L43.8,225.4L55.3,235.6L75.4,239.7L92.6,243.3L102.0,265.9L111.8,280.2L121.2,292.7L127.0,310.6L130.4,349.3L134.1,388.0L135.0,405.3L123.2,475.0L120.4,479.7L115.5,485.7L113.2,487.5L124.1,503.6L155.6,517.2L172.9,517.8L184.3,517.2L207.3,534.5L213.9,537.5L221.6,542.3L237.4,541.1L251.7,542.3L255.2,541.1L266.1,497.0L279.0,494.6L293.6,482.7L301.9,488.1L309.1,491.6L319.1,501.2L327.1,506.5L334.9,506.5L338.6,504.1L353.5,494.6L370.7,481.5L379.3,461.9L382.2,448.8L365.6,435.7L364.1,398.7L366.1,374.9L354.4,340.4L359.2,304.7L357.8,298.7L336.9,303.5L335.7,282.6L339.2,261.8L361.0,238.0L365.0,235.0L381.9,233.8L390.2,211.8L400.0,174.8L381.0,157.6L381.0,124.8L348.6,123.0L333.4,123.6L322.5,118.9L303.6,96.8L285.3,90.9L253.7,72.4L236.5,28.9L211.0,36.7L172.6,36.7L148.8,134.9L128.7,129.6L119.5,173.0L106.9,178.4L79.7,172.4L48.1,182.0L27.2,188.5Z";
+const CORSICA=[426.6,561.9];
+const NEIGHBOR_PATHS=["M113.2,487.5L124.1,503.6L155.6,517.2L172.9,517.8L184.3,517.2L207.8,534.5L214.4,536.9L238.2,541.1L251.7,542.3L255.2,541.1L264.6,579.8L207.3,603.6L164.2,588.7L118.4,564.9L113.2,487.5Z","M382.2,448.8L379.3,461.9L370.7,481.5L353.5,494.6L338.6,504.1L341.5,520.2L370.7,496.4L376.5,448.8L366.1,374.9L364.1,398.7L365.6,435.7L382.2,448.8Z","M336.9,303.5L335.7,282.6L339.2,261.8L361.0,238.0L365.0,235.0L381.9,233.8L390.2,211.8L400.0,174.8L410.9,162.9L393.7,151.0L381.0,124.8L381.0,157.6L365.0,235.0L354.4,340.4L359.2,304.7L357.8,298.7L336.9,303.5Z","M365.0,235.0L381.0,157.6L381.0,124.8L393.7,151.0L410.9,162.9L410.9,121.2L393.7,103.4L370.7,115.3L365.0,235.0Z","M253.7,72.4L285.3,90.9L303.6,96.8L322.5,118.9L333.4,123.6L348.6,123.0L350.6,91.5L333.4,79.6L293.3,55.7L250.3,43.8L253.7,72.4Z","M333.4,123.6L348.6,123.0L350.6,91.5L333.4,79.6L333.4,123.6Z"];
+const RIVER_PATHS=["124.1,128.4 149.9,134.3 173.4,143.9 192.9,158.2 207.3,162.9 221.6,158.2 231.6,159.9","105.5,253.4 119.8,265.3 132.7,258.2 148.5,249.3 164.2,246.3 180.0,243.3 192.9,246.3 208.7,252.2 227.3,259.4 246.0,237.4 265.2,270.1 274.7,283.2 281.8,302.9 289.0,332.6 293.9,352.3","293.9,352.3 296.7,396.4 299.6,419.0 302.5,435.7 303.3,450.0 303.3,466.6 302.5,479.7","311.1,245.1 307.1,274.9 302.5,301.1 299.6,322.5 296.7,342.8 293.9,352.3","133.9,358.2 144.8,384.4 154.2,398.1 164.2,408.3 175.7,419.0 188.6,435.7 200.1,447.6 215.9,459.5 227.9,471.4","365.0,235.0 367.3,199.8 368.4,153.4 370.1,136.1 375.0,124.2"];
+const CITY_DOTS=[{n:"Paris",x:231.6,y:159.9,s:"r"},{n:"Lyon",x:302.8,y:344.6,s:"r"},{n:"Bordeaux",x:147.6,y:398.7,s:"l"},{n:"Marseille",x:318.2,y:490.4,s:"r"},{n:"Strasbourg",x:386.5,y:176.0,s:"r"},{n:"Reims",x:279.8,y:136.1,s:"r"},{n:"Dijon",x:308.8,y:251.1,s:"r"},{n:"Nantes",x:119.8,y:257.0,s:"l"}];
+const REGION_PATHS=[{key:"champagne",color:"#6d63c8",path:"M254.6,134.3L264.6,145.1L273.2,140.3L282.4,137.9L293.3,148.0L304.8,154.0L310.5,167.7L314.8,180.8L309.1,193.9L299.0,197.5L283.3,195.7L268.1,187.9L258.3,177.8L253.1,162.9L254.6,134.3Z",lx:281.8,ly:165.9,l1:"Champagne",l2:""},{key:"alsace",color:"#c45a2a",path:"M365.0,235.0L373.6,237.4L381.9,233.8L390.2,211.8L400.0,174.8L381.0,157.6L381.0,145.1L367.9,151.0L363.6,171.9L365.0,198.7L365.0,235.0Z",lx:375.9,ly:193.9,l1:"Alsace",l2:""},{key:"loire",color:"#1a8c68",path:"M84.0,240.3L104.0,263.0L111.8,280.2L121.2,292.7L127.0,310.6L149.9,326.7L164.2,329.7L181.5,320.7L197.2,308.8L213.0,291.0L227.3,277.3L241.7,265.3L251.7,279.0L253.1,296.9L244.5,313.0L224.5,326.7L195.8,335.6L167.1,336.8L147.0,326.7L131.3,307.0L116.9,282.0L102.6,264.2L84.0,240.3Z",lx:178.6,ly:270.1,l1:"Loire",l2:"Valley"},{key:"burgundy",color:"#a8680f",path:"M268.1,187.9L276.1,204.6L284.7,215.3L294.7,229.6L303.3,241.5L311.9,252.2L317.7,267.1L320.5,280.8L318.5,296.9L311.9,311.8L304.8,320.7L296.7,324.9L289.0,318.9L281.8,305.8L275.5,291.0L268.9,276.1L263.2,261.2L260.3,245.1L263.2,228.4L268.1,207.6L268.1,187.9Z",lx:291.9,ly:258.2,l1:"Burgundy",l2:""},{key:"beaujolais",color:"#b84870",path:"M289.0,304.7L295.6,307.0L302.5,316.6L306.2,326.7L304.2,341.6L299.6,352.3L293.3,354.7L287.0,348.7L284.1,335.6L285.3,320.7L287.6,310.6L289.0,304.7Z",lx:294.7,ly:324.9,l1:"Beaujolais",l2:""},{key:"bordeaux",color:"#922222",path:"M133.9,358.2L145.6,365.4L156.2,372.5L166.5,382.1L174.3,394.0L178.0,410.1L175.7,426.1L168.6,438.0L157.1,444.0L144.8,439.8L134.1,424.9L129.3,405.9L127.0,386.2L130.4,368.4L133.9,358.2Z",lx:152.8,ly:398.1,l1:"Bordeaux",l2:""},{key:"rhone",color:"#4a40a8",path:"M293.9,352.3L302.5,353.5L308.2,360.6L311.9,376.1L312.8,392.2L310.5,408.3L308.2,423.8L305.3,438.0L301.3,451.7L296.7,459.5L291.9,461.9L287.6,455.9L286.1,439.8L287.0,422.0L289.0,405.9L289.9,389.2L291.0,370.2L292.7,358.2L293.9,352.3Z",lx:301.9,ly:398.1,l1:"Rhône",l2:""},{key:"provence",color:"#0d6048",path:"M294.7,459.5L301.9,466.6L310.5,473.8L319.7,483.3L328.3,493.4L334.9,502.4L338.6,504.1L353.5,494.6L370.7,481.5L379.3,461.9L382.2,448.8L365.6,435.7L350.6,442.8L335.7,451.7L322.5,459.5L311.1,466.6L301.9,467.8L296.2,465.4L294.7,459.5Z",lx:339.2,ly:465.4,l1:"Provence",l2:""},{key:"languedoc",color:"#8c3415",path:"M157.1,477.3L173.4,515.5L184.9,517.2L207.8,534.5L214.4,536.9L238.2,541.1L251.7,542.3L255.2,541.1L266.1,497.0L279.0,494.6L287.6,487.5L289.0,478.5L287.0,467.8L276.7,465.4L261.8,469.6L245.1,472.6L227.9,475.6L213.6,479.7L196.4,477.3L180.0,477.3L167.1,475.6L157.1,477.3Z",lx:233.1,ly:491.6,l1:"Languedoc",l2:""},{key:"sw",color:"#558818",path:"M113.2,487.5L124.1,503.6L155.6,517.2L167.1,475.6L180.0,477.3L196.4,477.3L180.0,454.7L175.7,426.1L168.6,438.0L157.1,444.0L144.8,439.8L134.1,424.9L129.3,405.9L127.0,386.2L130.4,368.4L133.9,358.2L130.4,349.3L134.1,388.0L135.0,405.3L123.2,475.0L120.4,479.7L115.5,485.7L113.2,487.5Z",lx:154.2,ly:454.7,l1:"South-West",l2:""},{key:"jura",color:"#2878c8",path:"M319.7,257.0L323.4,267.1L325.4,280.8L329.1,295.1L334.0,310.6L338.6,323.7L344.3,332.0L350.6,334.4L355.8,326.7L354.1,307.0L350.1,291.0L345.5,276.1L339.2,265.3L332.9,259.4L326.3,257.0L319.7,257.0Z",lx:338.6,ly:286.8,l1:"Jura &",l2:"Savoie"}];
 
-// Real wine region GeoJSON polygons — boundaries based on actual AOC limits
-// Each polygon closely matches official INAO delimitation
-const WINE_REGIONS_GEO = {
-  champagne: {coords:[[
-    [3.10,49.35],[3.45,49.22],[3.72,49.19],[4.05,49.28],[4.40,49.25],
-    [4.85,49.08],[5.10,48.90],[5.28,48.68],[5.32,48.48],[5.05,48.30],
-    [4.60,48.28],[4.10,48.30],[3.62,48.42],[3.28,48.58],[3.05,48.78],
-    [3.02,49.05],[3.10,49.35]
-  ]], label:[4.15,48.77]},
+// ═══════════════════════════════════════════════════════════
+// BUILD SVG MAP — pure SVG, no D3 GeoJSON
+// ═══════════════════════════════════════════════════════════
+const NS = 'http://www.w3.org/2000/svg';
+const mapSvg = document.getElementById('map-svg');
+const mapTt  = document.getElementById('map-tooltip');
 
-  alsace: {coords:[[
-    [7.12,48.96],[7.35,48.98],[7.58,48.97],[7.82,48.97],[8.22,48.60],
-    [7.88,47.98],[7.59,47.61],[7.32,47.44],[7.12,47.52],[7.00,47.59],
-    [6.86,47.54],[6.85,47.72],[6.90,48.05],[6.98,48.38],[7.05,48.65],
-    [7.08,48.82],[7.12,48.96]
-  ]], label:[7.40,48.25]},
+function svgEl(tag, attrs, styles) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
+  if (styles) Object.entries(styles).forEach(([k,v]) => e.style[k] = v);
+  return e;
+}
 
-  loire: {coords:[[
-    [-2.85,47.55],[-2.15,47.15],[-1.83,46.83],[-1.50,46.62],[-1.30,46.32],
-    [-0.50,46.10],[0.00,46.05],[0.55,46.18],[1.10,46.32],[1.65,46.62],
-    [2.15,46.85],[2.65,47.05],[3.08,46.88],[3.15,46.62],[2.85,46.30],
-    [2.15,46.10],[1.20,45.92],[0.20,45.90],[-0.55,46.05],[-1.10,46.32],
-    [-1.58,46.78],[-2.10,47.10],[-2.60,47.38],[-2.85,47.55]
-  ]], label:[0.50,46.92]},
-
-  burgundy: {coords:[[
-    [3.52,47.98],[3.85,47.88],[4.20,47.78],[4.68,47.55],[5.12,47.42],
-    [5.38,47.18],[5.52,46.92],[5.50,46.68],[5.38,46.45],[5.12,46.22],
-    [4.85,46.10],[4.58,46.05],[4.32,46.15],[4.08,46.38],[3.85,46.62],
-    [3.65,46.85],[3.45,47.12],[3.32,47.38],[3.38,47.65],[3.52,47.98]
-  ]], label:[4.48,47.15]},
-
-  beaujolais: {coords:[[
-    [4.32,46.42],[4.55,46.38],[4.82,46.22],[4.98,46.05],[4.92,45.78],
-    [4.75,45.62],[4.52,45.58],[4.30,45.68],[4.18,45.88],[4.22,46.12],
-    [4.28,46.32],[4.32,46.42]
-  ]], label:[4.58,46.05]},
-
-  bordeaux: {coords:[[
-    [-1.06,45.52],[-0.68,45.42],[-0.30,45.32],[0.05,45.18],[0.35,44.98],
-    [0.52,44.72],[0.45,44.42],[0.18,44.22],[-0.22,44.10],[-0.65,44.15],
-    [-1.02,44.38],[-1.22,44.68],[-1.32,45.02],[-1.20,45.32],[-1.06,45.52]
-  ]], label:[-0.40,44.82]},
-
-  rhone: {coords:[[
-    [4.50,45.62],[4.82,45.62],[5.00,45.52],[5.15,45.28],[5.18,45.00],
-    [5.12,44.72],[5.05,44.48],[4.98,44.22],[4.85,43.98],[4.70,43.85],
-    [4.52,43.80],[4.35,43.90],[4.28,44.15],[4.30,44.42],[4.38,44.68],
-    [4.40,44.98],[4.42,45.28],[4.45,45.48],[4.50,45.62]
-  ]], label:[4.78,44.82]},
-
-  provence: {coords:[[
-    [4.52,43.80],[4.70,43.85],[4.98,43.72],[5.38,43.52],[5.72,43.30],
-    [5.95,43.10],[6.08,43.07],[6.60,43.23],[7.20,43.45],[7.50,43.78],
-    [7.60,44.00],[7.02,44.22],[6.50,44.12],[5.98,43.95],[5.52,43.85],
-    [5.15,43.72],[4.82,43.68],[4.60,43.70],[4.52,43.80]
-  ]], label:[6.10,43.68]},
-
-  languedoc: {coords:[[
-    [-0.25,43.52],[0.32,42.88],[0.72,42.85],[1.52,42.56],[1.75,42.52],
-    [2.58,42.45],[3.05,42.43],[3.17,42.45],[3.55,43.19],[4.00,43.23],
-    [4.28,43.32],[4.35,43.45],[4.28,43.65],[3.92,43.72],[3.42,43.68],
-    [2.85,43.62],[2.25,43.55],[1.75,43.48],[1.15,43.52],[0.58,43.52],
-    [0.12,43.55],[-0.25,43.52]
-  ]], label:[2.45,43.25]},
-
-  sw: {coords:[[
-    [-1.78,43.35],[-1.40,43.08],[-0.30,42.85],[0.30,42.84],[0.70,42.85],
-    [0.12,43.55],[-0.25,43.52],[-0.22,43.78],[0.05,44.10],[0.18,44.22],
-    [-0.22,44.10],[-0.65,44.15],[-1.02,44.38],[-1.22,44.68],[-1.32,45.02],
-    [-1.20,45.32],[-1.06,45.52],[-1.18,45.67],[-1.05,45.02],[-1.02,44.73],
-    [-1.43,43.56],[-1.53,43.48],[-1.70,43.38],[-1.78,43.35]
-  ]], label:[-0.42,43.88]},
-
-  jura: {coords:[[
-    [5.40,47.15],[5.55,47.00],[5.58,46.78],[5.70,46.55],[5.88,46.32],
-    [6.05,46.12],[6.22,45.98],[6.45,45.92],[6.62,46.05],[6.58,46.35],
-    [6.45,46.62],[6.28,46.88],[6.05,47.05],[5.82,47.15],[5.60,47.18],
-    [5.40,47.15]
-  ]], label:[6.05,46.65]}
-};
-
-// Neighbor countries — real simplified outlines
-const NEIGHBORS = [
-  {id:'spain',  coords:[[-1.78,43.35],[-1.40,43.08],[-0.30,42.85],[0.30,42.84],[0.70,42.85],[1.52,42.56],[1.75,42.52],[2.58,42.45],[3.05,42.43],[3.17,42.45],[3.50,41.80],[1.50,41.40],[0.00,41.65],[-1.60,42.05],[-1.78,43.35]]},
-  {id:'andorra',coords:[[1.42,42.55],[1.78,42.55],[1.78,42.42],[1.42,42.42],[1.42,42.55]]},
-  {id:'italy',  coords:[[7.60,44.00],[7.50,43.78],[7.20,43.45],[6.60,43.23],[6.08,43.07],[6.18,42.90],[7.00,43.20],[7.15,43.80],[7.02,44.22],[7.04,45.24],[6.97,44.84],[7.02,44.22],[7.60,44.00]]},
-  {id:'switz',  coords:[[6.02,46.44],[6.10,47.14],[6.86,47.54],[7.00,47.59],[7.32,47.44],[7.59,47.61],[7.88,47.98],[8.22,48.60],[8.60,48.82],[7.80,48.95],[7.00,48.70],[6.50,48.10],[6.25,47.60],[5.98,46.79],[6.02,46.44]]},
-  {id:'germany',coords:[[7.00,47.59],[6.86,47.54],[7.05,47.28],[7.12,48.96],[7.35,48.98],[7.58,48.97],[7.82,48.97],[8.22,48.60],[8.60,48.82],[8.20,49.10],[7.80,49.50],[7.56,49.44],[7.56,48.89],[7.00,47.59]]},
-  {id:'lux',    coords:[[5.90,49.46],[6.43,49.47],[6.52,50.02],[6.10,50.12],[5.90,49.76],[5.90,49.46]]},
-  {id:'belgium',coords:[[2.52,51.05],[1.63,50.92],[2.00,50.82],[2.55,50.52],[3.12,50.32],[3.68,50.35],[4.22,50.01],[4.86,49.91],[5.52,49.54],[5.90,49.46],[5.90,49.76],[6.10,50.12],[5.80,50.35],[5.10,50.75],[4.00,51.00],[2.52,51.05]]}
-];
-
-// Rivers — real approximate centerlines
-const RIVERS = {
-  seine:   [[-1.40,49.38],[-0.50,49.28],[0.32,49.12],[1.00,48.88],[1.50,48.80],[2.00,48.88],[2.35,48.85],[2.45,48.78],[3.00,48.58]],
-  loire:   [[-2.05,47.28],[-1.55,47.08],[-1.10,47.20],[-0.55,47.35],[0.00,47.40],[0.55,47.45],[1.00,47.40],[1.55,47.30],[2.20,47.18],[2.85,47.55],[3.52,47.00],[3.85,46.78],[4.10,46.45],[4.35,45.95],[4.52,45.62]],
-  rhone:   [[4.52,45.62],[4.52,45.18],[4.62,44.88],[4.72,44.50],[4.82,44.22],[4.85,43.98],[4.85,43.70],[4.82,43.48]],
-  saone:   [[5.12,47.42],[4.98,46.92],[4.82,46.48],[4.72,46.12],[4.62,45.78],[4.52,45.62]],
-  garonne: [[-1.06,45.52],[-0.68,45.08],[-0.35,44.85],[0.00,44.68],[0.40,44.50],[0.85,44.22],[1.25,44.02],[1.80,43.82],[2.22,43.62]],
-  dordogne:[[0.05,44.88],[0.35,44.98],[0.72,45.05],[1.05,45.08],[1.45,44.92],[1.85,44.82],[2.18,44.75]],
-  rhine:   [[7.00,47.59],[7.05,47.85],[7.08,48.18],[7.08,48.55],[7.12,48.96],[7.18,49.25],[7.35,49.45]]
-};
-
-// Key cities (lon/lat)
-const CITIES = [
-  {n:'Paris',     x:2.35,  y:48.85, s:'r'},
-  {n:'Lyon',      x:4.83,  y:45.75, s:'r'},
-  {n:'Bordeaux',  x:-0.58, y:44.84, s:'l'},
-  {n:'Marseille', x:5.37,  y:43.30, s:'r'},
-  {n:'Strasbourg',x:7.75,  y:48.58, s:'r'},
-  {n:'Reims',     x:4.03,  y:49.25, s:'r'},
-  {n:'Dijon',     x:5.04,  y:47.32, s:'r'},
-  {n:'Nantes',    x:-1.55, y:47.22, s:'l'},
-  {n:'Montpellier',x:3.87, y:43.61, s:'r'},
-  {n:'Nice',      x:7.27,  y:43.70, s:'r'}
-];
-
-// ═══════════════════════════════════════════════════════════════════════
-// D3 MAP RENDERING
-// ═══════════════════════════════════════════════════════════════════════
-const svgEl = document.getElementById('map-svg');
-
-// Use D3 conic conformal projection — standard cartographic choice for France
-// Parameters match IGN's official Lambert-93 spirit (center on France)
-const projection = d3.geoConicConformal()
-  .center([2.5, 46.5])    // France centroid
-  .parallels([44, 49])     // standard parallels for France
-  .scale(2800)
-  .translate([200, 280]);  // centre in 400×560 viewport
-
-const path = d3.geoPath().projection(projection);
-
-// Set SVG viewBox
-svgEl.setAttribute('viewBox','0 0 400 560');
-
-const svg = d3.select(svgEl);
-
-// Sea background
-svg.append('rect').attr('width',400).attr('height',560).attr('class','sea');
-
-// Neighbor countries
-NEIGHBORS.forEach(nb => {
-  svg.append('path')
-    .datum({type:'Polygon', coordinates:[nb.coords]})
-    .attr('d', path)
-    .attr('class','neighbor');
-});
-
+// Sea
+mapSvg.appendChild(svgEl('rect', {width:420, height:580, class:'sea'}));
+// Neighbors
+NEIGHBOR_PATHS.forEach(d => mapSvg.appendChild(svgEl('path', {d, class:'nbr'})));
 // France land base
-svg.append('path')
-  .datum(FRANCE_OUTLINE)
-  .attr('d', path)
-  .attr('class','fr-land');
-
+mapSvg.appendChild(svgEl('path', {d:FR_PATH, class:'fr-land'}));
 // Rivers
-Object.entries(RIVERS).forEach(([,coords]) => {
-  svg.append('path')
-    .datum({type:'LineString', coordinates:coords})
-    .attr('d', path)
-    .attr('class','river');
+RIVER_PATHS.forEach(pts => mapSvg.appendChild(svgEl('polyline', {points:pts, class:'river'})));
+// Corsica
+mapSvg.appendChild(svgEl('ellipse', {cx:CORSICA[0], cy:CORSICA[1], rx:10, ry:20, class:'corsica-el'}));
+// Wine regions
+REGION_PATHS.forEach(r => {
+  const g = svgEl('g', {class:'wine-rgn', id:'rgn-'+r.key});
+  const p = svgEl('path', {d:r.path});
+  p.style.fill = r.color;
+  p.style.stroke = r.color;
+  g.appendChild(p);
+  const t = svgEl('text', {class:'map-lbl', x:r.lx, y:r.ly});
+  if (r.l2) {
+    const s1 = document.createElementNS(NS,'tspan');
+    s1.setAttribute('x',r.lx); s1.setAttribute('dy','-0.55em'); s1.textContent = r.l1;
+    const s2 = document.createElementNS(NS,'tspan');
+    s2.setAttribute('x',r.lx); s2.setAttribute('dy','1.15em'); s2.textContent = r.l2;
+    t.appendChild(s1); t.appendChild(s2);
+  } else { t.textContent = r.l1; }
+  g.appendChild(t);
+  g.addEventListener('click', () => selectRegion(r.key));
+  g.addEventListener('mousemove', ev => {
+    const rect = mapSvg.parentElement.getBoundingClientRect();
+    mapTt.style.opacity = '1';
+    mapTt.textContent = TERROIR.regions[r.key]?.name || r.key;
+    mapTt.style.left = (ev.clientX - rect.left + 12) + 'px';
+    mapTt.style.top  = (ev.clientY - rect.top  - 32) + 'px';
+  });
+  g.addEventListener('mouseleave', () => { mapTt.style.opacity = '0'; });
+  mapSvg.appendChild(g);
 });
-
-// Corsica (approximate ellipse)
-const [csx, csy] = projection([9.15, 42.1]);
-svg.append('ellipse')
-  .attr('cx', csx).attr('cy', csy)
-  .attr('rx', 10).attr('ry', 20)
-  .attr('class','corsica')
-  .style('fill','#e2ddd4').style('stroke','#b8b0a6').style('stroke-width',.4);
-
-// Wine region shapes
-const regionGroup = svg.append('g').attr('class','wine-regions-group');
-const tooltip = document.getElementById('map-tooltip');
-
-Object.entries(WINE_REGIONS_GEO).forEach(([key, data]) => { if (!data || !data.coords || !data.coords.length || !data.label) return;
-  const rdata = TERROIR.regions[key];
-  if (!rdata) return;
-
-  const g = regionGroup.append('g')
-    .attr('class','wine-region')
-    .attr('id','rgn-'+key);
-
-  let pathD = '';
-  try { pathD = path({type:'Polygon', coordinates:data.coords}); } catch(e) { console.warn('Bad coords for', key, e); return; }
-  if (!pathD) return;
-  g.append('path')
-    .attr('d', pathD)
-    .style('fill', rdata.color)
-    .style('stroke', rdata.color);
-
-  // Region label
-  const [lx, ly] = projection(data.label);
-  const words = rdata.name.split(' ');
-  const textEl = g.append('text').attr('class','rgn-label').attr('x', lx).attr('y', ly);
-  if (words.length >= 2) {
-    const mid = Math.ceil(words.length/2);
-    textEl.append('tspan').attr('x',lx).attr('dy','-0.55em').text(words.slice(0,mid).join(' '));
-    textEl.append('tspan').attr('x',lx).attr('dy','1.15em').text(words.slice(mid).join(' '));
-  } else {
-    textEl.text(words[0]);
-  }
-
-  // Events
-  g.on('click', () => selectRegion(key))
-   .on('mousemove', (event) => {
-      tooltip.style.opacity = '1';
-      tooltip.textContent = rdata.name;
-      const rect = svgEl.parentElement.getBoundingClientRect();
-      tooltip.style.left = (event.clientX - rect.left + 12) + 'px';
-      tooltip.style.top  = (event.clientY - rect.top  - 32) + 'px';
-   })
-   .on('mouseleave', () => { tooltip.style.opacity = '0'; });
+// France border on top
+mapSvg.appendChild(svgEl('path', {d:FR_PATH, class:'fr-border'}));
+// Cities
+CITY_DOTS.forEach(c => {
+  mapSvg.appendChild(svgEl('circle', {cx:c.x, cy:c.y, r:2, class:'city-dot'}));
+  const t = svgEl('text', {x:c.x+(c.s==='r'?4:-4), y:c.y+1, class:'city-lbl', 'text-anchor':c.s==='r'?'start':'end'});
+  t.textContent = c.n;
+  mapSvg.appendChild(t);
 });
+// Compass
+const cg = svgEl('g');
+const ct = svgEl('text', {x:22, y:30, class:'carto-n'}); ct.textContent='N'; cg.appendChild(ct);
+const ca = svgEl('polygon', {points:'22,33 18.5,42 22,40 25.5,42'}); ca.style.fill='#8a7d72'; cg.appendChild(ca);
+mapSvg.appendChild(cg);
+// Scale
+const sbg = svgEl('g', {transform:'translate(16,563)'});
+[[0,'scale-a'],[28,'scale-b'],[56,'scale-a'],[84,'scale-b']].forEach(([ox,cls]) => sbg.appendChild(svgEl('rect',{x:ox,y:0,width:28,height:4,class:cls})));
+const sbt = svgEl('text',{x:56,y:-3,class:'scale-t'}); sbt.textContent='~200 km'; sbg.appendChild(sbt);
+mapSvg.appendChild(sbg);
 
-// France outline on top (crisp border)
-svg.append('path')
-  .datum(FRANCE_OUTLINE)
-  .attr('d', path)
-  .attr('fill','none')
-  .attr('stroke','#8a7d72')
-  .attr('stroke-width', 1.2);
+// Pulse animation
+function pulseRegion(key) {
+  const r = REGION_PATHS.find(x => x.key===key);
+  if (!r) return;
+  const c = svgEl('circle', {cx:r.lx, cy:r.ly, r:0});
+  c.style.fill='none'; c.style.stroke=TERROIR.regions[key]?.color||'#888';
+  c.style.strokeWidth='2'; c.style.opacity='.6';
+  mapSvg.appendChild(c);
+  let start=null;
+  function step(ts){ if(!start)start=ts; const p=Math.min((ts-start)/650,1); c.setAttribute('r',p*30); c.style.opacity=(1-p)*0.55; if(p<1)requestAnimationFrame(step); else c.remove(); }
+  requestAnimationFrame(step);
+}
 
-// City dots
-CITIES.forEach(c => {
-  const [cx, cy] = projection([c.x, c.y]);
-  svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',2).attr('class','city-mark');
-  const ox = c.s==='r' ? 4 : -4;
-  const anchor = c.s==='r' ? 'start' : 'end';
-  svg.append('text').attr('x',cx+ox).attr('y',cy+1).attr('class','city-name').attr('text-anchor',anchor).text(c.n);
-});
+// Map active state helper (called by selectRegion)
+function setMapActive(key) {
+  document.querySelectorAll('.wine-rgn').forEach(e => e.classList.remove('active'));
+  document.getElementById('rgn-'+key)?.classList.add('active');
+  pulseRegion(key);
+}
 
-// Compass rose
-const [nx,ny] = [22,38];
-svg.append('text').attr('x',nx).attr('y',ny-9).attr('class','carto-label').text('N');
-svg.append('polygon').attr('points',`${nx},${ny-2} ${nx-3.5},${ny+8} ${nx},${ny+6} ${nx+3.5},${ny+8}`).attr('class','north-arrow');
-
-// Scale bar (alternating black/white 50km segments × 4 = ~200km)
-// At scale 2800, 1° ≈ ~77km. Adjust segment to ~50km = ~0.65° → test visually
-const [s0x] = projection([1.0, 44.0]);
-const [s1x] = projection([1.65, 44.0]);
-const segW = s1x - s0x;  // roughly 50km
-const sbY = 545;
-const sbX = 18;
-[0,1,2,3].forEach((i) => {
-  svg.append('rect').attr('x',sbX+i*segW).attr('y',sbY).attr('width',segW).attr('height',4)
-    .attr('class', i%2===0 ? 'scale-seg-a':'scale-seg-b');
-});
-svg.append('text').attr('x',sbX).attr('y',sbY-3).attr('class','scale-txt').attr('text-anchor','start').text('0');
-svg.append('text').attr('x',sbX+2*segW).attr('y',sbY-3).attr('class','scale-txt').text('100');
-svg.append('text').attr('x',sbX+4*segW).attr('y',sbY-3).attr('class','scale-txt').text('200 km');
-
-// ═══════════════════════════════════════════════════════════════════════
-// APPELLATION DATA
-// ═══════════════════════════════════════════════════════════════════════
 const APPELLATIONS = {
   champagne_aoc:    {name:'Champagne AOC',region:'champagne',type:'Sparkling',desc:'The overarching appellation for all Champagne. Any wine carrying the name must be produced within the delimited zone using méthode champenoise, with secondary fermentation in bottle. Non-vintage blends can draw on reserve wines across multiple years to maintain house style.',stats:{hectares:'34,300 ha',grapes:'Pinot Noir, Chardonnay, Pinot Meunier',ageing:'Min 15 months (NV), 36 months (vintage)'}},
   coteaux_champenois:{name:'Coteaux Champenois',region:'champagne',type:'Still',desc:'The rare still AOC of Champagne — light red, white and rosé from the same vineyards. Bouzy Rouge from Pinot Noir is the most celebrated expression, and in warm years can be genuinely fine.',stats:{hectares:'~80 ha harvested',grapes:'Pinot Noir (reds), Chardonnay (whites)',ageing:'Variable'}},
@@ -719,9 +543,7 @@ function selectRegion(key, resetStack=true) {
   currentRegion = key;
   if (resetStack) navStack=[{type:'region',id:key}];
 
-  d3.selectAll('.wine-region').classed('active',false);
-  d3.select('#rgn-'+key).classed('active',true);
-  pulseMap(key);
+  setMapActive(key);
 
   document.querySelectorAll('.rn-pill').forEach(p=>{p.classList.remove('active');p.style.background='';p.style.borderColor='';p.style.color='';});
   const np=document.getElementById('nav-'+key);
