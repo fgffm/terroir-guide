@@ -518,7 +518,7 @@ svg.append('ellipse')
 const regionGroup = svg.append('g').attr('class','wine-regions-group');
 const tooltip = document.getElementById('map-tooltip');
 
-Object.entries(WINE_REGIONS_GEO).forEach(([key, data]) => {
+Object.entries(WINE_REGIONS_GEO).forEach(([key, data]) => { if (!data || !data.coords || !data.coords.length || !data.label) return;
   const rdata = TERROIR.regions[key];
   if (!rdata) return;
 
