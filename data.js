@@ -630,13 +630,49 @@ const TERROIR = {
         "Fleurie": "Most feminine Cru. Roses, raspberry, silky.",
         "Loire (Touraine Gamay)": "Fresh, lighter. Good for summer drinking."
       }
+    },
+
+    pinot_meunier: {
+      id: "pinot_meunier", name: "Pinot Meunier", color: "red",
+      origin: "Champagne, France",
+      synonyms: ["Meunier", "Schwarzriesling (Germany)"],
+      character: "The workhorse of Champagne, providing fruitiness and approachability to blends. Ripens earlier than Pinot Noir, making it more reliable in the cool Marne valley. Often underrated — in the hands of producers like Laherte it can shine as a varietal wine.",
+      food_affinities: ["Champagne food pairings across styles"],
+      global_presence: "Champagne (France), minor presence in Germany and Australia",
+      regional_expression: { "Vallee de la Marne": "Fruity, early-drinking, red apple and brioche. Backbone of many NV blends." }
+    },
+
+    sauvignon_blanc: {
+      id: "sauvignon_blanc", name: "Sauvignon Blanc", color: "white",
+      origin: "Loire Valley / Bordeaux, France",
+      synonyms: ["Fume Blanc (California)", "Muskat-Silvaner (Austria, obsolete)"],
+      character: "One of France's most versatile white grapes — producing the minerally dry wines of Sancerre and Pouilly-Fume, the blended whites of Graves and Pessac-Leognan (with Semillon), and the world's most popular easy-drinking white in New Zealand. Signature aromas: cut grass, elderflower, gooseberry, and passion fruit in warmer climates.",
+      food_affinities: ["Goat cheese", "Asparagus", "Seafood", "Sushi", "Thai food", "Light salads"],
+      global_presence: "Loire Valley (Sancerre, Pouilly-Fume), Bordeaux (Graves), New Zealand (Marlborough), South Africa, Chile, California",
+      regional_expression: {
+        "Sancerre / Pouilly-Fume": "Mineral, flinty, citrus, and white flower. The classic benchmark.",
+        "Graves / Pessac-Leognan": "Blended with Semillon. Richer, waxy, smoke, fig. Ages magnificently.",
+        "Marlborough, NZ": "Intensely aromatic, passion fruit, cut grass. Clean and precise.",
+        "South Africa (Stellenbosch)": "Fresh citrus, some tropical notes. Very good value."
+      }
+    },
+
+    merlot: {
+      id: "merlot", name: "Merlot", color: "red",
+      origin: "Bordeaux, France",
+      synonyms: ["Bigney (some old Bordeaux references)"],
+      character: "The world's most-planted red grape, and Bordeaux's most important by volume. Merlot ripens early, producing softer tannins, higher alcohol, and plummy, approachable wines. On the clay soils of Pomerol and Saint-Emilion it reaches extraordinary complexity. At its best: plum, chocolate, mocha, and velvety texture.",
+      food_affinities: ["Duck confit", "Lamb", "Mushroom risotto", "Soft-rind cheeses", "Beef stew", "Pasta with meat sauce"],
+      global_presence: "Bordeaux Right Bank (France), California, Chile (Colchagua), Washington State, Italy (Super Tuscans)",
+      regional_expression: {
+        "Saint-Emilion": "Clay-limestone soils. Plummy, textured, accessible.",
+        "Pomerol": "Clay soils. Extraordinary concentration — Petrus is 100% Merlot.",
+        "California (Napa)": "Riper, jammy, more alcoholic than Bordeaux.",
+        "Chile (Colchagua)": "Plum, dark chocolate, good value."
+      }
     }
+
   },
-
-
-    pinot_meunier: { id:'pinot_meunier', name:'Pinot Meunier', color:'red', origin:'Champagne, France', synonyms:['Meunier','Schwarzriesling (Germany)'], character:'The workhorse of Champagne, providing fruitiness and approachability to blends. Ripens earlier than Pinot Noir, making it more reliable in the cool Marne valley. Often underrated — in the hands of producers like Kistler and Laherte it can shine as a varietal wine.', food_affinities:['Champagne food pairings across styles'], global_presence:'Champagne (France), minor presence in Germany and Australia', regional_expression:{'Vallée de la Marne':'Fruity, early-drinking, red apple and brioche. Backbone of many NV blends.'} },
-    sauvignon_blanc: { id:'sauvignon_blanc', name:'Sauvignon Blanc', color:'white', origin:'Loire Valley / Bordeaux, France', synonyms:['Fumé Blanc (California)','Muskat-Silvaner (Austria, obsolete)'], character:'One of France's most versatile white grapes — producing the minerally dry wines of Sancerre and Pouilly-Fumé, the blended whites of Graves and Pessac-Léognan (with Sémillon), and the world's most popular easy-drinking white in New Zealand. Signature aromas: cut grass, elderflower, gooseberry, and — in warmer climates — passion fruit and grapefruit.', food_affinities:['Goat cheese','Asparagus','Seafood','Sushi','Thai food','Light salads'], global_presence:'Loire Valley (Sancerre, Pouilly-Fumé), Bordeaux (Graves), New Zealand (Marlborough), South Africa, Chile, California', regional_expression:{'Sancerre / Pouilly-Fumé':'Mineral, flinty, citrus, and white flower. The classic benchmark.','Graves / Pessac-Léognan':'Blended with Sémillon. Richer, waxy, smoke, fig. Ages magnificently.','Marlborough, NZ':'Intensely aromatic, passion fruit, cut grass. Clean and precise.','South Africa (Stellenbosch)':'Fresh citrus, some tropical notes. Very good value.'} },
-    merlot: { id:'merlot', name:'Merlot', color:'red', origin:'Bordeaux, France', synonyms:['Bigney (some old Bordeaux references)'], character:'The world's most-planted red grape, and Bordeaux's most important by volume. Merlot ripens early, producing softer tannins, higher alcohol, and plummy, approachable wines. On the clay soils of Pomerol (Pétrus) and Saint-Émilion it reaches extraordinary complexity. At its best: plum, chocolate, mocha, and velvety texture.', food_affinities:['Duck confit','Lamb','Mushroom risotto','Soft-rind cheeses','Beef stew','Pasta with meat sauce'], global_presence:'Bordeaux Right Bank (France), California, Chile (Colchagua), Washington State, Italy (Super Tuscans)', regional_expression:{'Saint-Émilion':'Clay-limestone soils. Plummy, textured, accessible.','Pomerol':'Clay soils. Extraordinary concentration — Pétrus is 100% Merlot.','California (Napa)':'Riper, jammy, more alcoholic than Bordeaux.','Chile (Colchagua)':'Plum, dark chocolate, good value.'} },
 
   // ─── PAIRING DATA ───────────────────────────────────────────────────────────
   // Used by pairing mode: dish keywords → matching wine profiles
