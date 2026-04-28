@@ -526,9 +526,11 @@ Object.entries(WINE_REGIONS_GEO).forEach(([key, data]) => { if (!data || !data.c
     .attr('class','wine-region')
     .attr('id','rgn-'+key);
 
+  let pathD = '';
+  try { pathD = path({type:'Polygon', coordinates:[data.coords]}); } catch(e) { console.warn('Bad coords for', key, e); return; }
+  if (!pathD) return;
   g.append('path')
-    .datum({type:'Polygon', coordinates:[data.coords]})
-    .attr('d', path)
+    .attr('d', pathD)
     .style('fill', rdata.color)
     .style('stroke', rdata.color);
 
