@@ -6,7 +6,7 @@
 <title>terroir.guide — A field guide to French wine</title>
 <meta name="description" content="An encyclopedic, illustrated guide to the wines, regions, appellations, producers, and grapes of France.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Lato:wght@300;400;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="geo.js"></script>
 <script src="data.js"></script>
@@ -340,6 +340,13 @@ const REGION_COLORS = {
   sw:'#558818',        jura:'#2878c8'
 };
 
+// Predominant style per region — drives the grape-cluster mark (filled = red, outline = white/rosé)
+const REGION_STYLE_HINT = {
+  champagne:'white', alsace:'white', loire:'white', burgundy:'red',
+  beaujolais:'red', bordeaux:'red', rhone:'red', provence:'white',
+  languedoc:'red', sw:'red', jura:'white'
+};
+
 const REGION_LABELS = {
   champagne:  {lon:4.15,  lat:48.78, l1:'Champagne',  l2:''},
   alsace:     {lon:7.45,  lat:48.32, l1:'Alsace',      l2:''},
@@ -391,8 +398,35 @@ const projection = d3.geoConicConformal()
 
 const geoPath = d3.geoPath().projection(projection);
 
+// Small hand-drawn grape cluster + leaf mark, used beside region labels.
+// filled=true → solid cluster (red wine regions), filled=false → outline only (white/rosé regions)
+function appendGrapeMark(svg, x, y, color, filled) {
+  const g = svg.append('g')
+    .attr('transform', `translate(${x},${y}) scale(0.62)`)
+    .attr('pointer-events','none');
+  const dots = [[-3,-2],[0,-3.5],[3,-2],[-4.5,1],[-1.5,0.5],[1.5,0.5],[4.5,1],[-2,4],[2,4],[0,5.8]];
+  dots.forEach(([dx,dy]) => {
+    g.append('circle').attr('cx',dx).attr('cy',dy).attr('r',1.9)
+      .attr('fill', filled ? '#fff' : 'none')
+      .attr('fill-opacity', filled ? 0.92 : 0)
+      .attr('stroke','#fff').attr('stroke-width','.7').attr('stroke-opacity',0.85);
+  });
+  // leaf
+  g.append('path')
+    .attr('d','M -1,-6 C -5,-8 -6,-4 -3,-1 C -1,-4 1,-6 -1,-6 Z')
+    .attr('fill','#fff').attr('fill-opacity',0.55)
+    .attr('stroke','#fff').attr('stroke-width','.5').attr('stroke-opacity',0.7);
+}
+
 function buildMap() {
   const svg = d3.select(mapSvg);
+
+  // Paper-grain texture, used over the base landmass for a terrain feel
+  const defs = svg.append('defs');
+  const grain = defs.append('filter').attr('id','paper-grain').attr('x','-10%').attr('y','-10%').attr('width','120%').attr('height','120%');
+  grain.append('feTurbulence').attr('type','fractalNoise').attr('baseFrequency','0.85').attr('numOctaves','2').attr('stitchTiles','stitch').attr('result','noise');
+  grain.append('feColorMatrix').attr('in','noise').attr('type','matrix')
+    .attr('values','0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0');
 
   // Sea
   svg.append('rect').attr('width',420).attr('height',580).attr('fill','#b0c8d8');
@@ -403,6 +437,10 @@ function buildMap() {
     .enter().append('path')
     .attr('d', geoPath)
     .attr('fill','#ddd8ce').attr('stroke','#c8c0b4').attr('stroke-width','.35');
+
+  // Terrain grain overlay across the whole landmass
+  svg.append('rect').attr('x',0).attr('y',0).attr('width',420).attr('height',580)
+    .attr('fill','#3a3226').attr('filter','url(#paper-grain)').attr('pointer-events','none');
 
   // Rivers
   Object.values(RIVERS_LL).forEach(coords => {
@@ -429,9 +467,9 @@ function buildMap() {
       .datum(feat)
       .attr('d', geoPath)
       .attr('fill', color)
-      .attr('fill-opacity', '0.72')
+      .attr('fill-opacity', '0.9')
       .attr('stroke', '#fff')
-      .attr('stroke-width', '1.5')
+      .attr('stroke-width', '2.2')
       .attr('stroke-linejoin','round');
 
     g.on('click', () => handleRegionTap(key))
@@ -444,24 +482,27 @@ function buildMap() {
      })
      .on('mouseleave', () => { mapTt.style.opacity = '0'; });
 
-    // Region label
+    // Region label — hand-lettered
     const [lx, ly] = projection([label.lon, label.lat]);
     const t = svg.append('text')
       .attr('x', lx).attr('y', ly)
       .attr('text-anchor','middle').attr('dominant-baseline','central')
-      .attr('font-family',"'Lato',sans-serif").attr('font-size','8.5')
-      .attr('font-weight','700').attr('letter-spacing','.07em')
-      .attr('text-transform','uppercase')
+      .attr('font-family',"'Caveat',cursive").attr('font-size','17')
+      .attr('font-weight','700')
       .attr('fill','#fff').attr('pointer-events','none')
-      .style('paint-order','stroke').style('stroke','rgba(0,0,0,.3)')
-      .style('stroke-width','2.8px').style('stroke-linejoin','round');
+      .style('paint-order','stroke').style('stroke','rgba(0,0,0,.32)')
+      .style('stroke-width','3px').style('stroke-linejoin','round');
 
     if (label.l2) {
-      t.append('tspan').attr('x',lx).attr('dy','-0.55em').text(label.l1.toUpperCase());
-      t.append('tspan').attr('x',lx).attr('dy','1.15em').text(label.l2.toUpperCase());
+      t.append('tspan').attr('x',lx).attr('dy','-0.5em').text(label.l1);
+      t.append('tspan').attr('x',lx).attr('dy','1.05em').text(label.l2);
     } else {
-      t.text(label.l1.toUpperCase());
+      t.text(label.l1);
     }
+
+    // Grape cluster mark beside the label
+    const markerDy = label.l2 ? 16 : 11;
+    appendGrapeMark(svg, lx, ly + markerDy, color, REGION_STYLE_HINT[key] !== 'white');
   });
 
   // France outer border
