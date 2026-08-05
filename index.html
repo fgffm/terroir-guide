@@ -35,6 +35,45 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);display:fl
 .nav-tab{font-family:var(--sans);font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:20px;border:1px solid transparent;cursor:pointer;background:transparent;color:var(--ink3);transition:all .15s;white-space:nowrap}
 .nav-tab:hover{color:var(--ink);background:var(--paper2)}
 .nav-tab.active{color:var(--white);background:var(--ink);border-color:var(--ink)}
+.search-btn{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink3);cursor:pointer;transition:all .15s;margin-left:4px;flex-shrink:0}
+.search-btn:hover{color:var(--ink);border-color:var(--line2);background:var(--paper2)}
+
+/* ── Search overlay ── */
+#search-overlay{position:fixed;inset:0;background:rgba(28,24,20,.45);z-index:200;display:none;align-items:flex-start;justify-content:center;padding-top:10vh}
+#search-overlay.open{display:flex}
+#search-box{background:var(--white);border-radius:var(--r-lg);width:min(560px,92vw);max-height:74vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.28);overflow:hidden}
+#search-input-row{display:flex;align-items:center;gap:9px;padding:14px 16px;border-bottom:1px solid var(--line);flex-shrink:0}
+#search-input{flex:1;border:none;outline:none;font-family:var(--sans);font-size:14.5px;background:transparent;color:var(--ink)}
+#search-close{cursor:pointer;color:var(--ink3);font-size:20px;line-height:1;background:none;border:none;padding:2px 4px}
+#search-close:hover{color:var(--ink)}
+#search-results{overflow-y:auto;padding:6px 0}
+.sr-group-lbl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink4);padding:10px 16px 4px}
+.sr-item{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer}
+.sr-item:hover{background:var(--paper2)}
+.sr-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.sr-name{font-size:13px;color:var(--ink);font-weight:600}
+.sr-meta{font-size:11px;color:var(--ink3)}
+.sr-empty{padding:26px 16px;text-align:center;color:var(--ink4);font-size:13px}
+.sr-hint{padding:26px 16px;text-align:center;color:var(--ink4);font-size:12px;line-height:1.7}
+
+/* ── Cellar notes ── */
+.cellar-note-box{margin-top:1.3rem;border-top:1px solid var(--line);padding-top:1rem}
+.cellar-textarea{width:100%;min-height:64px;font-family:var(--sans);font-size:12.5px;color:var(--ink2);border:1px solid var(--line);border-radius:var(--r-md);padding:8px 10px;resize:vertical;background:var(--white)}
+.cellar-textarea:focus{outline:none;border-color:var(--line2)}
+.cellar-row{display:flex;align-items:center;gap:10px;margin-top:7px}
+.cellar-save-btn{font-size:11px;padding:5px 13px;border-radius:20px;border:1px solid var(--line2);background:var(--white);cursor:pointer;color:var(--ink2);font-family:var(--sans)}
+.cellar-save-btn:hover{background:var(--paper2)}
+.cellar-saved-tag{font-size:10.5px;color:var(--ink4);opacity:0;transition:opacity .2s}
+.cellar-saved-tag.show{opacity:1}
+.cellar-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:11px 13px;cursor:pointer;transition:border-color .14s,background .14s;margin-bottom:7px}
+.cellar-card:hover{border-color:var(--line2);background:var(--paper)}
+.cellar-card-top{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.cellar-card-name{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--ink)}
+.cellar-card-type{font-size:10px;color:var(--ink4);text-transform:uppercase;letter-spacing:.05em}
+.cellar-card-note{font-size:12px;color:var(--ink2);line-height:1.6;margin-top:3px}
+.cellar-card-del{float:right;font-size:11px;color:var(--ink4);cursor:pointer;text-decoration:underline}
+.cellar-empty{padding:2.5rem 1rem;text-align:center;color:var(--ink3)}
+.cellar-empty-icon{font-size:28px;margin-bottom:10px;color:var(--ink4)}
 
 /* ── App layout ── */
 #app{display:grid;grid-template-columns:500px 1fr;flex:1;min-height:0;overflow:hidden}
@@ -199,7 +238,9 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);display:fl
   #right-panel{overflow-y:auto;min-height:50vh}
   #site-header{padding:.6rem 1rem}
   .logo-sub{display:none}
-  .nav-tab{font-size:10px;padding:4px 8px}
+  .header-nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .header-nav::-webkit-scrollbar{display:none}
+  .nav-tab{font-size:10px;padding:4px 8px;flex-shrink:0}
   .view{padding:1.4rem 1.2rem 2rem}
   .info-grid{grid-template-columns:1fr}
   .pair-hero,.pair-results{padding:1.2rem}
@@ -268,8 +309,23 @@ body.mobile-zoomed.detail-visible #mobile-back-btn{display:flex;opacity:1;transf
     <button class="nav-tab"        id="tab-calendar" onclick="switchTab('calendar')">Vintages</button>
     <button class="nav-tab"        id="tab-pairings" onclick="switchTab('pairings')">Pairings</button>
     <button class="nav-tab"        id="tab-grapes"   onclick="switchTab('grapes')">Grapes</button>
+    <button class="nav-tab"        id="tab-cellar"   onclick="switchTab('cellar')">My Cellar</button>
+    <button class="search-btn" id="search-open-btn" onclick="openSearch()" aria-label="Search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
+    </button>
   </nav>
 </header>
+
+<div id="search-overlay" onclick="if(event.target===this)closeSearch()">
+  <div id="search-box">
+    <div id="search-input-row">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" style="color:var(--ink4);flex-shrink:0"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
+      <input id="search-input" type="text" placeholder="Search regions, appellations, producers, grapes…" autocomplete="off" oninput="runSearch(this.value)">
+      <button id="search-close" onclick="closeSearch()" aria-label="Close search">&times;</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+</div>
 
 <button id="mobile-back-btn" onclick="closeMobileDetail()" aria-label="Back to map">&larr;</button>
 
@@ -296,6 +352,7 @@ body.mobile-zoomed.detail-visible #mobile-back-btn{display:flex;opacity:1;transf
     <div class="view" id="view-producer"></div>
     <div class="view" id="view-grape"></div>
     <div class="view" id="view-grapes-index"></div>
+    <div class="view" id="view-cellar"></div>
 
     <div class="view" id="view-calendar">
       <p class="sec-lbl">Cross-region vintage guide</p>
@@ -754,6 +811,7 @@ function switchTab(tab) {
   else if (tab==='calendar') { navStack=[]; showView('calendar'); }
   else if (tab==='pairings') { navStack=[]; showView('pairings'); }
   else if (tab==='grapes')   { navStack=[]; showView('grapes-index'); }
+  else if (tab==='cellar')   { navStack=[]; renderCellarView(); showView('cellar'); }
 }
 
 function goHome() {
@@ -915,11 +973,11 @@ function selectAppellation(id, pushStack=true) {
     if (!navStack.find(n=>n.type==='region'&&n.id===a.region)) navStack=[{type:'region',id:a.region}];
     navStack.push({type:'appellation',id});
   }
-  document.getElementById('view-appellation').innerHTML = renderAppellation(a);
+  document.getElementById('view-appellation').innerHTML = renderAppellation(a, id);
   showView('appellation');
 }
 
-function renderAppellation(a) {
+function renderAppellation(a, id) {
   const r=TERROIR.regions[a.region];
   const rc=r?.color||'#888';
   const prods=Object.values(TERROIR.producers).filter(p=>p.region===a.region).slice(0,4);
@@ -939,6 +997,7 @@ function renderAppellation(a) {
     h+=`</div>`;
   }
   h+=`<div class="tip-box" style="border-left-color:${rc}">Return to <span style="cursor:pointer;text-decoration:underline;color:${rc}" onclick="selectRegion('${a.region}',false)">${r?.name||'the region'}</span> to see all appellations and producers.</div>`;
+  if (id) h+=cellarNoteBoxHtml('appellation', id, rc);
   return h;
 }
 
@@ -973,6 +1032,7 @@ function renderProducer(p) {
     h+=`</div>`;
   }
   h+=`<div class="tip-box" style="border-left-color:${rc};margin-top:1.2rem">Prices are indicative retail (Paris/online, 2024–25). Drinking windows assume 12–14°C, 70% humidity storage.</div>`;
+  h+=cellarNoteBoxHtml('producer', p.id, rc);
   return h;
 }
 
@@ -1095,6 +1155,155 @@ function runPairing(){
   });
   h+=`</div><p style="font-size:11px;color:var(--ink4);margin-top:.9rem;font-style:italic">Click any result to explore the full region.</p>`;
   results.innerHTML=h;
+}
+
+// ── Cellar notes (localStorage, no login) ──────────────────────────────────────
+const CELLAR_KEY = 'terroir_cellar_notes_v1';
+
+function getCellar() {
+  try { return JSON.parse(localStorage.getItem(CELLAR_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveCellarNote(type, id, text) {
+  const store = getCellar();
+  const key = type+':'+id;
+  const trimmed = (text||'').trim();
+  if (!trimmed) { delete store[key]; }
+  else { store[key] = { type, id, note: trimmed, updated: Date.now() }; }
+  try { localStorage.setItem(CELLAR_KEY, JSON.stringify(store)); } catch(e) {}
+  return store;
+}
+
+function deleteCellarNote(type, id) {
+  const store = getCellar();
+  delete store[type+':'+id];
+  try { localStorage.setItem(CELLAR_KEY, JSON.stringify(store)); } catch(e) {}
+  renderCellarView();
+}
+
+function cellarNoteBoxHtml(type, id, accentColor) {
+  const store = getCellar();
+  const existing = store[type+':'+id]?.note || '';
+  const safeId = (type+'_'+id).replace(/[^a-zA-Z0-9_]/g,'_');
+  return `<div class="cellar-note-box">
+    <p class="sec-lbl">My cellar note</p>
+    <textarea class="cellar-textarea" id="cn-${safeId}" placeholder="Tasting notes, vintages you own, when to open…">${existing}</textarea>
+    <div class="cellar-row">
+      <button class="cellar-save-btn" style="border-color:${accentColor}66;color:${accentColor}" onclick="handleSaveCellarNote('${type}','${id}','cn-${safeId}','tag-${safeId}')">Save note</button>
+      <span class="cellar-saved-tag" id="tag-${safeId}">Saved</span>
+    </div>
+  </div>`;
+}
+
+function handleSaveCellarNote(type, id, textareaId, tagId) {
+  const val = document.getElementById(textareaId)?.value || '';
+  saveCellarNote(type, id, val);
+  const tag = document.getElementById(tagId);
+  if (tag) {
+    tag.classList.add('show');
+    clearTimeout(tag._t);
+    tag._t = setTimeout(()=>tag.classList.remove('show'), 1800);
+  }
+}
+
+function renderCellarView() {
+  const store = getCellar();
+  const entries = Object.values(store).sort((a,b)=>b.updated-a.updated);
+  const el = document.getElementById('view-cellar');
+  if (!entries.length) {
+    el.innerHTML = `<div class="cellar-empty">
+      <div class="cellar-empty-icon">&#10022;</div>
+      <p style="font-family:var(--serif);font-size:1.3rem;font-style:italic;margin-bottom:.5rem">Your cellar is empty</p>
+      <p style="font-size:12.5px;color:var(--ink4);max-width:340px;margin:0 auto">Open any producer or appellation and add a note, a vintage you're holding, a drinking window, a tasting impression. It'll show up here.</p>
+    </div>`;
+    return;
+  }
+  let h = `<p class="welcome-hint" style="margin-bottom:.3rem">My cellar</p><h1 class="welcome-heading" style="font-size:1.9rem;margin-bottom:1.2rem">Your notes</h1>`;
+  entries.forEach(e => {
+    let name = e.id, typeLabel = e.type, onClick = '';
+    if (e.type === 'producer') {
+      const p = TERROIR.producers[e.id];
+      name = p?.name || e.id; typeLabel = 'Producer';
+      onClick = `selectProducer('${e.id}');switchTab('map')`;
+    } else if (e.type === 'appellation') {
+      const a = APPELLATIONS[e.id];
+      name = a?.name || e.id; typeLabel = 'Appellation';
+      onClick = `selectAppellation('${e.id}');switchTab('map')`;
+    }
+    h += `<div class="cellar-card" onclick="${onClick}">
+      <span class="cellar-card-del" onclick="event.stopPropagation();deleteCellarNote('${e.type}','${e.id}')">Remove</span>
+      <div class="cellar-card-top"><span class="cellar-card-name">${name}</span></div>
+      <div class="cellar-card-type">${typeLabel}</div>
+      <div class="cellar-card-note">${e.note.replace(/</g,'&lt;')}</div>
+    </div>`;
+  });
+  el.innerHTML = h;
+}
+
+// ── Global search ────────────────────────────────────────────────────────────
+function openSearch() {
+  document.getElementById('search-overlay').classList.add('open');
+  const input = document.getElementById('search-input');
+  input.value = '';
+  runSearch('');
+  setTimeout(()=>input.focus(), 30);
+}
+
+function closeSearch() {
+  document.getElementById('search-overlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeSearch();
+  if ((e.key === '/' || (e.metaKey && e.key.toLowerCase()==='k')) &&
+      document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault(); openSearch();
+  }
+});
+
+function runSearch(qRaw) {
+  const q = qRaw.trim().toLowerCase();
+  const results = document.getElementById('search-results');
+  if (!q) {
+    results.innerHTML = `<div class="sr-hint">Search by name — try a region, an appellation like "Pauillac", a producer, or a grape like "Chenin".<br><br>Tip: press <strong>/</strong> anytime to search.</div>`;
+    return;
+  }
+
+  const regions = Object.values(TERROIR.regions).filter(r => r.name.toLowerCase().includes(q)).slice(0,6);
+  const appellations = Object.values(APPELLATIONS).filter(a => a.name.toLowerCase().includes(q)).slice(0,8);
+  const producers = Object.values(TERROIR.producers).filter(p => p.name.toLowerCase().includes(q) || p.village?.toLowerCase().includes(q)).slice(0,8);
+  const grapes = Object.values(TERROIR.grapes).filter(g => g.name.toLowerCase().includes(q)).slice(0,6);
+
+  const total = regions.length + appellations.length + producers.length + grapes.length;
+  if (!total) { results.innerHTML = `<div class="sr-empty">No matches for "${qRaw}".</div>`; return; }
+
+  let h = '';
+  if (regions.length) {
+    h += `<div class="sr-group-lbl">Regions</div>`;
+    regions.forEach(r => h += `<div class="sr-item" onclick="closeSearch();selectRegion('${r.id}');switchTab('map')">
+      <span class="sr-dot" style="background:${r.color}"></span>
+      <span class="sr-name">${r.name}</span></div>`);
+  }
+  if (appellations.length) {
+    h += `<div class="sr-group-lbl">Appellations</div>`;
+    appellations.forEach(a => { const r=TERROIR.regions[a.region]; h += `<div class="sr-item" onclick="closeSearch();selectAppellation('${Object.keys(APPELLATIONS).find(k=>APPELLATIONS[k]===a)}')">
+      <span class="sr-dot" style="background:${r?.color||'#888'}"></span>
+      <span><span class="sr-name">${a.name}</span> <span class="sr-meta">— ${r?.name||a.region}</span></span></div>`; });
+  }
+  if (producers.length) {
+    h += `<div class="sr-group-lbl">Producers</div>`;
+    producers.forEach(p => { const r=TERROIR.regions[p.region]; h += `<div class="sr-item" onclick="closeSearch();selectProducer('${p.id}')">
+      <span class="sr-dot" style="background:${r?.color||'#888'}"></span>
+      <span><span class="sr-name">${p.name}</span> <span class="sr-meta">— ${p.village||r?.name||''}</span></span></div>`; });
+  }
+  if (grapes.length) {
+    h += `<div class="sr-group-lbl">Grapes</div>`;
+    grapes.forEach(g => h += `<div class="sr-item" onclick="closeSearch();selectGrape('${g.id}')">
+      <span class="sr-dot" style="background:${g.color==='white'?'#d8c878':'#8b2020'}"></span>
+      <span class="sr-name">${g.name}</span></div>`);
+  }
+  results.innerHTML = h;
 }
 
 // ── Region nav pills ──────────────────────────────────────────────────────────
