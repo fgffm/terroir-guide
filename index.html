@@ -1388,6 +1388,7 @@ function renderCellarView() {
 const VOCAB_TIER_COLORS = { amateur:'#8c8c8c', aficionado:'#1a8c68', expert:'#922222' };
 let vocabTier = 'amateur';
 let vocabMode = 'browse'; // 'browse' | 'quiz'
+let quizBranch = null;    // null | 'white' | 'red' | 'sparkling' | 'open'
 let quizStep = 0;
 let quizAnswers = {};
 
@@ -1407,7 +1408,7 @@ function renderVocabularyView() {
   h += `<p style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:.9rem">A working vocabulary for describing what is in the glass, in English and French, moving from everyday language up to the terms a sommelier uses. Each tier adds to the one before it.</p>`;
   h += `<div class="cellar-card" style="cursor:pointer;background:var(--paper)" onclick="startQuiz()">
     <div class="cellar-card-top"><span class="cellar-card-name">Take the sommelier quiz &rarr;</span></div>
-    <p class="cellar-card-note">Eight quick this or that choices, matched against the site's regions, ending with wines and appellations that fit what you described.</p>
+    <p class="cellar-card-note">Start with white, red, sparkling, or open to suggestion. A quick this or that from there, matched against the site's regions, ending with wines and appellations that fit what you described.</p>
   </div>`;
 
   h += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin:1.1rem 0 .4rem">`;
@@ -1444,9 +1445,10 @@ function renderVocabularyView() {
   el.innerHTML = h;
 }
 
-// ── Sommelier quiz ("this or that") ──────────────────────────────────────────
+// ── Sommelier quiz ("this or that", branching) ───────────────────────────────
 function startQuiz() {
   vocabMode = 'quiz';
+  quizBranch = null;
   quizStep = 0;
   quizAnswers = {};
   renderVocabularyView();
@@ -1454,6 +1456,13 @@ function startQuiz() {
 
 function exitQuiz() {
   vocabMode = 'browse';
+  renderVocabularyView();
+}
+
+function chooseQuizBranch(tag) {
+  quizBranch = tag;
+  quizStep = 0;
+  quizAnswers = {};
   renderVocabularyView();
 }
 
@@ -1465,14 +1474,19 @@ function answerQuiz(axis, tag) {
 
 function goBackQuiz() {
   if (quizStep > 0) { quizStep--; renderVocabularyView(); }
+  else { quizBranch = null; renderVocabularyView(); }
 }
 
-function scoreQuizRegions() {
-  return Object.keys(QUIZ_REGION_PROFILES).map(key => {
-    const profile = QUIZ_REGION_PROFILES[key];
-    let score = 0;
-    Object.keys(quizAnswers).forEach(axis => { if (profile[axis] === quizAnswers[axis]) score++; });
-    return { key, score };
+function scoreQuizRegions(pool) {
+  return Object.keys(pool).map(key => {
+    const profile = pool[key];
+    let score = 0, total = 0;
+    Object.keys(quizAnswers).forEach(axis => {
+      if (!(axis in profile)) return;
+      total++;
+      if (profile[axis] === quizAnswers[axis]) score++;
+    });
+    return { key, score, total };
   }).sort((a,b) => b.score - a.score);
 }
 
@@ -1480,14 +1494,32 @@ function renderQuiz() {
   const el = document.getElementById('view-vocabulary');
   let h = `<p class="welcome-hint" style="margin-bottom:.3rem">Sommelier quiz</p>`;
 
-  if (quizStep < QUIZ_STEPS.length) {
-    const step = QUIZ_STEPS[quizStep];
-    const term = VOCABULARY.terms[step.termId];
+  // Step 0: mood selector
+  if (!quizBranch) {
+    h += `<h1 class="welcome-heading" style="font-size:1.7rem;margin-bottom:.3rem">${QUIZ_INTRO.prompt_en}</h1>`;
+    h += `<p style="font-size:12px;color:var(--ink4);font-style:italic;margin-bottom:1.1rem">${QUIZ_INTRO.prompt_fr}</p>`;
+    h += `<div style="display:flex;flex-direction:column;gap:10px">`;
+    QUIZ_INTRO.options.forEach(o => {
+      h += `<button class="quiz-option" onclick="chooseQuizBranch('${o.tag}')">
+        <span class="quiz-option-en">${o.en}</span>
+        <span class="quiz-option-fr">${o.fr}</span>
+      </button>`;
+    });
+    h += `</div>`;
+    h += `<div style="margin-top:1.2rem"><span class="quiz-link" onclick="exitQuiz()">Exit quiz</span></div>`;
+    el.innerHTML = h;
+    return;
+  }
+
+  const steps = QUIZ_BRANCH_STEPS[quizBranch];
+
+  if (quizStep < steps.length) {
+    const step = steps[quizStep];
     h += `<h1 class="welcome-heading" style="font-size:1.7rem;margin-bottom:.3rem">${step.prompt_en}</h1>`;
-    h += `<p style="font-size:12px;color:var(--ink4);font-style:italic;margin-bottom:1.1rem">${step.prompt_fr} &middot; Step ${quizStep+1} of ${QUIZ_STEPS.length}</p>`;
-    h += `<div class="quiz-progress"><div class="quiz-progress-bar" style="width:${Math.round((quizStep/QUIZ_STEPS.length)*100)}%"></div></div>`;
+    h += `<p style="font-size:12px;color:var(--ink4);font-style:italic;margin-bottom:1.1rem">${step.prompt_fr} &middot; Step ${quizStep+1} of ${steps.length}</p>`;
+    h += `<div class="quiz-progress"><div class="quiz-progress-bar" style="width:${Math.round((quizStep/steps.length)*100)}%"></div></div>`;
     h += `<div style="display:flex;flex-direction:column;gap:10px;margin-top:1rem">`;
-    term.variations.forEach(v => {
+    step.options.forEach(v => {
       h += `<button class="quiz-option" onclick="answerQuiz('${step.axis}','${v.tag}')">
         <span class="quiz-option-en">${v.en}</span>
         <span class="quiz-option-fr">${v.fr}</span>
@@ -1496,25 +1528,39 @@ function renderQuiz() {
     });
     h += `</div>`;
     h += `<div style="margin-top:1.2rem">`;
-    if (quizStep > 0) h += `<span class="quiz-link" onclick="goBackQuiz()">&larr; Back</span>`;
+    h += `<span class="quiz-link" onclick="goBackQuiz()">&larr; Back</span>`;
     h += `<span class="quiz-link" style="margin-left:14px" onclick="exitQuiz()">Exit quiz</span>`;
     h += `</div>`;
+    el.innerHTML = h;
+    return;
+  }
+
+  // Results
+  const summaryBits = steps.map(step => {
+    const v = step.options.find(o => o.tag === quizAnswers[step.axis]);
+    return v ? v.en.toLowerCase() : '';
+  }).filter(Boolean);
+
+  h += `<h1 class="welcome-heading" style="font-size:1.7rem;margin-bottom:.6rem">Your profile</h1>`;
+  h += `<p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:1.3rem">You are drawn to a wine that is ${summaryBits.join(', ')}.</p>`;
+  h += `<p class="sec-lbl">${quizBranch === 'sparkling' ? 'The wine, and who makes it' : 'Regions that fit'}</p>`;
+
+  if (quizBranch === 'sparkling') {
+    const key = quizAnswers.dosage + ':' + quizAnswers.autolysis;
+    const prodId = QUIZ_SPARKLING_PRODUCER[key] || 'chartogne_taillet';
+    const region = TERROIR.regions.champagne;
+    const prod = TERROIR.producers[prodId];
+    h += `<div class="cellar-card" onclick="exitQuiz();selectProducer('${prodId}');switchTab('map')">
+      <div class="cellar-card-top"><span class="cellar-card-name">${region.name}</span><span class="cellar-card-type">Sparkling</span></div>
+      <p class="cellar-card-note">${region.summary}</p>
+      <p class="cellar-card-note" style="margin-top:4px">Look for <strong>${prod.name}</strong>${prod.village ? `, ${prod.village}` : ''}.</p>
+    </div>`;
   } else {
-    const ranked = scoreQuizRegions();
+    const pool = QUIZ_REGION_PROFILES[quizBranch];
+    const ranked = scoreQuizRegions(pool);
     const top = ranked.slice(0,3).filter(r=>r.score>0);
-    const summaryBits = QUIZ_STEPS.map(step=>{
-      const tag = quizAnswers[step.axis];
-      const term = VOCABULARY.terms[step.termId];
-      const v = term.variations.find(v=>v.tag===tag);
-      return v ? v.en.toLowerCase() : '';
-    }).filter(Boolean);
-
-    h += `<h1 class="welcome-heading" style="font-size:1.7rem;margin-bottom:.6rem">Your profile</h1>`;
-    h += `<p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:1.3rem">You are drawn to a wine that is ${summaryBits.join(', ')}.</p>`;
-    h += `<p class="sec-lbl">Regions that fit</p>`;
-
     if (!top.length) {
-      h += `<p style="font-size:13px;color:var(--ink4)">No strong match came through — try the quiz again with a clearer instinct on each choice.</p>`;
+      h += `<p style="font-size:13px;color:var(--ink4)">No strong match came through &mdash; try the quiz again with a clearer instinct on each choice.</p>`;
     } else {
       top.forEach(r => {
         const region = TERROIR.regions[r.key];
@@ -1526,19 +1572,19 @@ function renderQuiz() {
         h += `<div class="cellar-card" onclick="exitQuiz();selectRegion('${r.key}',true);switchTab('map')">
           <div class="cellar-card-top">
             <span class="cellar-card-name">${region.name}</span>
-            <span class="cellar-card-type">${r.score} of ${QUIZ_STEPS.length} match</span>
+            <span class="cellar-card-type">${r.score} of ${r.total} match</span>
           </div>
           <p class="cellar-card-note">${region.summary}</p>
           <p class="cellar-card-note" style="margin-top:4px">${app ? `Start with <strong>${app.name}</strong>` : ''}${app && prod ? ', from a producer like ' : ''}${prod ? `<strong>${prod.name}</strong>` : ''}</p>
         </div>`;
       });
     }
-
-    h += `<div style="margin-top:1.2rem">`;
-    h += `<span class="quiz-link" onclick="startQuiz()">Retake the quiz</span>`;
-    h += `<span class="quiz-link" style="margin-left:14px" onclick="exitQuiz()">Back to vocabulary</span>`;
-    h += `</div>`;
   }
+
+  h += `<div style="margin-top:1.2rem">`;
+  h += `<span class="quiz-link" onclick="startQuiz()">Retake the quiz</span>`;
+  h += `<span class="quiz-link" style="margin-left:14px" onclick="exitQuiz()">Back to vocabulary</span>`;
+  h += `</div>`;
 
   el.innerHTML = h;
 }

@@ -1114,35 +1114,185 @@ VOCABULARY.terms.vocab_finish_caudalie.variations = [
   { en: "A handful of caudalies, five to eight", fr: "Quelques caudalies, cinq à huit", example: "An easy drinking, everyday wine" },
   { en: "Fifteen caudalies or more, exceptional", fr: "Quinze caudalies ou plus, exceptionnel", example: "A great vintage Champagne or first growth Bordeaux" }
 ];
-
 // ─── SOMMELIER QUIZ ──────────────────────────────────────────────────────────
-// "This or that": eight steps, each pulling its two options directly from a
-// vocabulary term's two tagged variations, so every pair is a genuine match.
-// Answers are scored against a simplified signature style per region.
-const QUIZ_STEPS = [
-  { id: "color",     axis: "color",     termId: "vocab_appearance_hue",   prompt_en: "Pick the colour that pulls you in.",              prompt_fr: "Choisissez la couleur qui vous attire." },
-  { id: "fruit",      axis: "fruit",     termId: "vocab_nose_fruit",       prompt_en: "Which fruit character do you reach for?",         prompt_fr: "Quel caractère de fruit recherchez vous ?" },
-  { id: "oak",        axis: "oak",       termId: "vocab_nose_oaky",        prompt_en: "Oak, or no oak?",                                  prompt_fr: "Bois, ou sans bois ?" },
-  { id: "body",       axis: "body",      termId: "vocab_palate_body",      prompt_en: "How much weight do you want in the glass?",       prompt_fr: "Quel poids recherchez vous dans le verre ?" },
-  { id: "acidity",    axis: "acidity",   termId: "vocab_palate_acidity",   prompt_en: "Crisp, or round?",                                 prompt_fr: "Vif, ou rond ?" },
-  { id: "texture",    axis: "texture",   termId: "vocab_palate_texture",   prompt_en: "Silky, or structured?",                            prompt_fr: "Soyeux, ou structuré ?" },
-  { id: "sweetness",  axis: "sweetness", termId: "vocab_palate_sweetness", prompt_en: "Dry, or a touch of sweetness?",                    prompt_fr: "Sec, ou une pointe de douceur ?" },
-  { id: "finish",     axis: "finish",    termId: "vocab_finish_length",    prompt_en: "Short and easy, or long and complex?",             prompt_fr: "Courte et facile, ou longue et complexe ?" }
-];
+// "This or that", branching. First question sets the style (white, red,
+// sparkling, or open to suggestion); every question after that is drawn from
+// that branch, so a red drinker gets asked about tannin, not sweetness level,
+// and the open branch skips colour entirely and sticks to axes true of any wine.
 
-// Simplified signature style per region across the eight quiz axes.
-// A region can make several styles; this captures its single most iconic one,
-// which is what the quiz matches against and what the result text should reflect.
+const QUIZ_INTRO = {
+  prompt_en: "What are you in the mood for?",
+  prompt_fr: "De quelle humeur êtes vous ?",
+  options: [
+    { tag: "white",     en: "White",               fr: "Blanc" },
+    { tag: "red",       en: "Red",                 fr: "Rouge" },
+    { tag: "sparkling", en: "Sparkling",            fr: "Effervescent" },
+    { tag: "open",      en: "Open to suggestion",   fr: "Ouvert à la suggestion" }
+  ]
+};
+
+const QUIZ_BRANCH_STEPS = {
+
+  white: [
+    { axis: "fruit_white", prompt_en: "Which fruit character do you reach for?", prompt_fr: "Quel caractère de fruit recherchez vous ?", options: [
+      { tag: "citrus",   en: "Crisp citrus and green orchard fruit", fr: "Agrumes vifs et fruits à pépins verts", example: "Chablis (Burgundy), Sancerre (Loire)" },
+      { tag: "tropical", en: "Ripe stone fruit and tropical notes",  fr: "Fruits à noyau mûrs et notes exotiques",  example: "Alsace Pinot Gris, Condrieu (Rhône Viognier)" }
+    ]},
+    { axis: "oak", prompt_en: "Oak, or no oak?", prompt_fr: "Bois, ou sans bois ?", options: [
+      { tag: "yes", en: "Toasted, vanilla, spiced oak",       fr: "Boisé toasté, vanillé, épicé",         example: "Oaked Meursault (Burgundy)" },
+      { tag: "no",  en: "No oak, pure and unadorned fruit",   fr: "Sans bois, fruit pur et sans artifice", example: "Chablis (Burgundy), Muscadet (Loire)" }
+    ]},
+    { axis: "acidity", prompt_en: "Crisp, or round?", prompt_fr: "Vif, ou rond ?", options: [
+      { tag: "crisp", en: "Crisp, mouthwatering acidity", fr: "Acidité vive, qui fait saliver", example: "Chablis (Burgundy), Sancerre (Loire)" },
+      { tag: "soft",  en: "Soft, round acidity",          fr: "Acidité souple et ronde",         example: "Riper, warmer climate whites" }
+    ]},
+    { axis: "minerality", prompt_en: "What leads: stone, or fruit?", prompt_fr: "Qu'est ce qui domine : la pierre, ou le fruit ?", options: [
+      { tag: "mineral", en: "Stony, saline, mineral driven",       fr: "Pierreux, salin, à dominante minérale",   example: "Chablis (Burgundy), Muscadet (Loire)" },
+      { tag: "fruity",  en: "Ripe fruit driven, less mineral",     fr: "À dominante fruitée, peu minérale",       example: "Alsace Gewurztraminer" }
+    ]},
+    { axis: "texture", prompt_en: "Silky, or structured?", prompt_fr: "Soyeux, ou structuré ?", options: [
+      { tag: "silky",      en: "Silky, smooth, round texture",       fr: "Texture soyeuse, souple, ronde",        example: "A well made Loire Chenin Blanc" },
+      { tag: "structured", en: "Firm, structured, angular texture",  fr: "Texture ferme, structurée, anguleuse",  example: "Jura Savagnin under voile" }
+    ]},
+    { axis: "sweetness", prompt_en: "Dry, or a touch of sweetness?", prompt_fr: "Sec, ou une pointe de douceur ?", options: [
+      { tag: "dry",    en: "Bone dry",              fr: "Sec",                    example: "Most Burgundy and Loire whites" },
+      { tag: "offdry", en: "A touch of sweetness",  fr: "Une pointe de douceur",  example: "Alsace Riesling Vendanges Tardives, Vouvray demi sec" }
+    ]},
+    { axis: "finish", prompt_en: "Short and easy, or long and complex?", prompt_fr: "Courte et facile, ou longue et complexe ?", options: [
+      { tag: "short", en: "Short, clean, easy finish",              fr: "Finale courte, nette, facile",                 example: "An everyday Muscadet" },
+      { tag: "long",  en: "Long finish, flavour lingers for minutes", fr: "Finale longue, la saveur persiste plusieurs minutes", example: "A fine mature white Burgundy" }
+    ]}
+  ],
+
+  red: [
+    { axis: "fruit_red", prompt_en: "Which fruit character do you reach for?", prompt_fr: "Quel caractère de fruit recherchez vous ?", options: [
+      { tag: "red",  en: "Bright red fruit, cherry and redcurrant", fr: "Fruits rouges frais, cerise et groseille", example: "Volnay (Burgundy Pinot Noir), Morgon (Beaujolais)" },
+      { tag: "dark", en: "Dark fruit, blackcurrant and plum",       fr: "Fruits sombres, cassis et prune",           example: "Cahors (South West), Châteauneuf du Pape (Rhône)" }
+    ]},
+    { axis: "oak", prompt_en: "Oak, or no oak?", prompt_fr: "Bois, ou sans bois ?", options: [
+      { tag: "yes", en: "Toasted, vanilla, spiced oak",     fr: "Boisé toasté, vanillé, épicé",          example: "Classed growth Bordeaux" },
+      { tag: "no",  en: "No oak, pure and unadorned fruit", fr: "Sans bois, fruit pur et sans artifice", example: "A carbonic Beaujolais Cru" }
+    ]},
+    { axis: "tannin", prompt_en: "Silky, or structured tannin?", prompt_fr: "Tanin soyeux, ou structuré ?", options: [
+      { tag: "silky",      en: "Silky, fine grained tannin",      fr: "Tanin soyeux et fin",           example: "Volnay (Burgundy Pinot Noir)" },
+      { tag: "structured", en: "Firm, chewy, structured tannin",  fr: "Tanin ferme, mâché, structuré", example: "Pauillac (Bordeaux), young Madiran (South West)" }
+    ]},
+    { axis: "body", prompt_en: "How much weight do you want in the glass?", prompt_fr: "Quel poids recherchez vous dans le verre ?", options: [
+      { tag: "light", en: "Light, delicate on the palate", fr: "Léger et délicat en bouche",  example: "Beaujolais Cru" },
+      { tag: "full",  en: "Full, powerful, weighty",       fr: "Corsé, puissant, avec du poids", example: "Châteauneuf du Pape (Rhône), classed growth Bordeaux" }
+    ]},
+    { axis: "acidity", prompt_en: "Crisp, or round?", prompt_fr: "Vif, ou rond ?", options: [
+      { tag: "crisp", en: "Crisp, mouthwatering acidity", fr: "Acidité vive, qui fait saliver", example: "Burgundy Pinot Noir" },
+      { tag: "soft",  en: "Soft, round acidity",          fr: "Acidité souple et ronde",         example: "Southern Rhône Grenache" }
+    ]},
+    { axis: "finish", prompt_en: "Short and easy, or long and complex?", prompt_fr: "Courte et facile, ou longue et complexe ?", options: [
+      { tag: "short", en: "Short, clean, easy finish",                fr: "Finale courte, nette, facile",                        example: "A young, everyday Beaujolais" },
+      { tag: "long",  en: "Long finish, flavour lingers for minutes", fr: "Finale longue, la saveur persiste plusieurs minutes", example: "A fine mature Hermitage" }
+    ]}
+  ],
+
+  sparkling: [
+    { axis: "dosage", prompt_en: "Bone dry, or classic dosage?", prompt_fr: "Brut nature, ou dosage classique ?", options: [
+      { tag: "bone_dry", en: "Brut nature, no dosage",     fr: "Brut nature, sans dosage",  example: "Zero dosage grower Champagne, such as Egly-Ouriet" },
+      { tag: "classic",  en: "Classic brut dosage",        fr: "Dosage brut classique",     example: "Most standard Champagne house blends" }
+    ]},
+    { axis: "autolysis", prompt_en: "Toasty and vinous, or fresh and fruity?", prompt_fr: "Toasté et vineux, ou frais et fruité ?", options: [
+      { tag: "toasty", en: "Long lees ageing, toasty brioche", fr: "Long élevage sur lies, brioche toastée", example: "Grower Champagne, such as Bérêche & Fils" },
+      { tag: "fresh",  en: "Fresh, fruit forward, little lees character", fr: "Frais, fruité, peu marqué par les lies", example: "A lighter, fruit driven house style" }
+    ]},
+    { axis: "fruit", prompt_en: "Which fruit character do you reach for?", prompt_fr: "Quel caractère de fruit recherchez vous ?", options: [
+      { tag: "bright", en: "Citrus and orchard fruit", fr: "Agrumes et fruits à pépins", example: "Blanc de Blancs, Chardonnay driven" },
+      { tag: "dark",   en: "Red berry and cherry",     fr: "Baies rouges et cerise",     example: "Blanc de Noirs or a structured rosé Champagne" }
+    ]},
+    { axis: "acidity", prompt_en: "Crisp, or round?", prompt_fr: "Vif, ou rond ?", options: [
+      { tag: "crisp", en: "Crisp, mouthwatering acidity", fr: "Acidité vive, qui fait saliver", example: "A cool vintage, chalk driven Champagne" },
+      { tag: "soft",  en: "Soft, round acidity",          fr: "Acidité souple et ronde",         example: "A riper, warmer vintage Champagne" }
+    ]},
+    { axis: "bead", prompt_en: "Coarse and quick, or fine and lasting?", prompt_fr: "Grossière et rapide, ou fine et durable ?", options: [
+      { tag: "coarse", en: "Coarse, quickly fading bubbles",     fr: "Bulles grossières qui s'estompent vite", example: "A simple, short lees ageing Crémant" },
+      { tag: "fine",   en: "Fine, persistent, long lasting bead", fr: "Bulles fines et persistantes",           example: "Grower Champagne with extended lees ageing" }
+    ]},
+    { axis: "finish", prompt_en: "Short and easy, or long and complex?", prompt_fr: "Courte et facile, ou longue et complexe ?", options: [
+      { tag: "short", en: "Short, clean, easy finish",                fr: "Finale courte, nette, facile",                        example: "An entry level non vintage blend" },
+      { tag: "long",  en: "Long finish, flavour lingers for minutes", fr: "Finale longue, la saveur persiste plusieurs minutes", example: "A grand cru vintage Champagne" }
+    ]}
+  ],
+
+  open: [
+    { axis: "fruit", prompt_en: "Which fruit character do you reach for?", prompt_fr: "Quel caractère de fruit recherchez vous ?", options: [
+      { tag: "bright", en: "Fresh, bright red fruit and citrus", fr: "Fruits rouges frais et agrumes",  example: "Sancerre (Loire), young Morgon (Beaujolais)" },
+      { tag: "dark",   en: "Ripe, dark, brooding fruit",          fr: "Fruits sombres, mûrs et profonds", example: "Cahors (South West), Châteauneuf du Pape (Rhône)" }
+    ]},
+    { axis: "oak", prompt_en: "Oak, or no oak?", prompt_fr: "Bois, ou sans bois ?", options: [
+      { tag: "yes", en: "Toasted, vanilla, spiced oak",     fr: "Boisé toasté, vanillé, épicé",          example: "Oaked Meursault (Burgundy), classed growth Bordeaux" },
+      { tag: "no",  en: "No oak, pure and unadorned fruit", fr: "Sans bois, fruit pur et sans artifice", example: "Chablis (Burgundy), Muscadet (Loire)" }
+    ]},
+    { axis: "minerality", prompt_en: "What leads: stone, or fruit?", prompt_fr: "Qu'est ce qui domine : la pierre, ou le fruit ?", options: [
+      { tag: "mineral", en: "Stony, saline, mineral driven",   fr: "Pierreux, salin, à dominante minérale", example: "Chablis (Burgundy), Muscadet (Loire)" },
+      { tag: "fruity",  en: "Ripe fruit driven, less mineral", fr: "À dominante fruitée, peu minérale",     example: "Alsace Gewurztraminer, southern Rhône reds" }
+    ]},
+    { axis: "acidity", prompt_en: "Crisp, or round?", prompt_fr: "Vif, ou rond ?", options: [
+      { tag: "crisp", en: "Crisp, mouthwatering acidity", fr: "Acidité vive, qui fait saliver", example: "Chablis (Burgundy), Sancerre (Loire)" },
+      { tag: "soft",  en: "Soft, round acidity",          fr: "Acidité souple et ronde",         example: "Southern Rhône Grenache, warm vintage Languedoc reds" }
+    ]},
+    { axis: "texture", prompt_en: "Silky, or structured?", prompt_fr: "Soyeux, ou structuré ?", options: [
+      { tag: "silky",      en: "Silky, smooth, round texture",      fr: "Texture soyeuse, souple, ronde",        example: "Volnay (Burgundy), a well made Loire Chenin Blanc" },
+      { tag: "structured", en: "Firm, structured, angular texture", fr: "Texture ferme, structurée, anguleuse",  example: "Young Pauillac (Bordeaux), Hermitage (Rhône)" }
+    ]},
+    { axis: "sweetness", prompt_en: "Dry, or a touch of sweetness?", prompt_fr: "Sec, ou une pointe de douceur ?", options: [
+      { tag: "dry",    en: "Bone dry",             fr: "Sec",                   example: "Most Burgundy, Loire, and Bordeaux table wines" },
+      { tag: "offdry", en: "A touch of sweetness", fr: "Une pointe de douceur", example: "Alsace Riesling Vendanges Tardives, Vouvray demi sec" }
+    ]},
+    { axis: "finish", prompt_en: "Short and easy, or long and complex?", prompt_fr: "Courte et facile, ou longue et complexe ?", options: [
+      { tag: "short", en: "Short, clean, easy finish",                fr: "Finale courte, nette, facile",                        example: "An everyday Muscadet or simple Languedoc white" },
+      { tag: "long",  en: "Long finish, flavour lingers for minutes", fr: "Finale longue, la saveur persiste plusieurs minutes", example: "Grand cru Champagne, a fine mature Hermitage" }
+    ]}
+  ]
+};
+
+// Simplified signature profiles, one pool per branch. A region can appear in
+// more than one pool (Burgundy makes both benchmark whites and reds) with a
+// different profile in each, since the two styles taste nothing alike.
 const QUIZ_REGION_PROFILES = {
-  champagne:  { color: "pale", fruit: "bright", oak: "no",  body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "long"  },
-  alsace:     { color: "pale", fruit: "bright", oak: "no",  body: "full",  acidity: "crisp", texture: "silky",      sweetness: "offdry", finish: "long"  },
-  loire:      { color: "pale", fruit: "bright", oak: "no",  body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
-  burgundy:   { color: "deep", fruit: "bright", oak: "yes", body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "long"  },
-  beaujolais: { color: "deep", fruit: "bright", oak: "no",  body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
-  bordeaux:   { color: "deep", fruit: "dark",   oak: "yes", body: "full",  acidity: "soft",   texture: "structured", sweetness: "dry",    finish: "long"  },
-  rhone:      { color: "deep", fruit: "dark",   oak: "yes", body: "full",  acidity: "soft",   texture: "structured", sweetness: "dry",    finish: "long"  },
-  provence:   { color: "pale", fruit: "bright", oak: "no",  body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
-  languedoc:  { color: "deep", fruit: "dark",   oak: "no",  body: "full",  acidity: "soft",   texture: "structured", sweetness: "dry",    finish: "short" },
-  sw:         { color: "deep", fruit: "dark",   oak: "yes", body: "full",  acidity: "soft",   texture: "structured", sweetness: "dry",    finish: "long"  },
-  jura:       { color: "pale", fruit: "bright", oak: "no",  body: "full",  acidity: "crisp", texture: "structured", sweetness: "dry",    finish: "long"  }
+
+  white: {
+    alsace:   { fruit_white: "tropical", oak: "no",  acidity: "crisp", minerality: "fruity",  texture: "silky",      sweetness: "offdry", finish: "long"  },
+    loire:    { fruit_white: "citrus",   oak: "no",  acidity: "crisp", minerality: "mineral", texture: "silky",      sweetness: "dry",    finish: "short" },
+    burgundy: { fruit_white: "citrus",   oak: "yes", acidity: "crisp", minerality: "mineral", texture: "silky",      sweetness: "dry",    finish: "long"  },
+    jura:     { fruit_white: "citrus",   oak: "no",  acidity: "crisp", minerality: "mineral", texture: "structured", sweetness: "dry",    finish: "long"  },
+    provence: { fruit_white: "citrus",   oak: "no",  acidity: "crisp", minerality: "fruity",  texture: "silky",      sweetness: "dry",    finish: "short" }
+  },
+
+  red: {
+    burgundy:   { fruit_red: "red",  oak: "yes", tannin: "silky",      body: "light", acidity: "crisp", finish: "long"  },
+    beaujolais: { fruit_red: "red",  oak: "no",  tannin: "silky",      body: "light", acidity: "crisp", finish: "short" },
+    bordeaux:   { fruit_red: "dark", oak: "yes", tannin: "structured", body: "full",  acidity: "soft",  finish: "long"  },
+    rhone:      { fruit_red: "dark", oak: "yes", tannin: "structured", body: "full",  acidity: "soft",  finish: "long"  },
+    languedoc:  { fruit_red: "dark", oak: "no",  tannin: "structured", body: "full",  acidity: "soft",  finish: "short" },
+    sw:         { fruit_red: "dark", oak: "yes", tannin: "structured", body: "full",  acidity: "soft",  finish: "long"  }
+  },
+
+  open: {
+    champagne:  { fruit: "bright", oak: "no",  minerality: "mineral", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "long"  },
+    alsace:     { fruit: "bright", oak: "no",  minerality: "fruity",  acidity: "crisp", texture: "silky",      sweetness: "offdry", finish: "long"  },
+    loire:      { fruit: "bright", oak: "no",  minerality: "mineral", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
+    burgundy:   { fruit: "bright", oak: "yes", minerality: "mineral", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "long"  },
+    beaujolais: { fruit: "bright", oak: "no",  minerality: "fruity",  acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
+    bordeaux:   { fruit: "dark",   oak: "yes", minerality: "fruity",  acidity: "soft",  texture: "structured", sweetness: "dry",    finish: "long"  },
+    rhone:      { fruit: "dark",   oak: "yes", minerality: "fruity",  acidity: "soft",  texture: "structured", sweetness: "dry",    finish: "long"  },
+    provence:   { fruit: "bright", oak: "no",  minerality: "fruity",  acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
+    languedoc:  { fruit: "dark",   oak: "no",  minerality: "fruity",  acidity: "soft",  texture: "structured", sweetness: "dry",    finish: "short" },
+    sw:         { fruit: "dark",   oak: "yes", minerality: "fruity",  acidity: "soft",  texture: "structured", sweetness: "dry",    finish: "long"  },
+    jura:       { fruit: "bright", oak: "no",  minerality: "mineral", acidity: "crisp", texture: "structured", sweetness: "dry",    finish: "long"  }
+  }
+};
+
+// Sparkling is handled separately: with only one dedicated sparkling region
+// in the dataset, the quiz always lands on Champagne, and uses the dosage and
+// autolysis answers to pick which of its five producers fits best.
+const QUIZ_SPARKLING_PRODUCER = {
+  "bone_dry:toasty": "egly_ouriet",
+  "bone_dry:fresh":  "laherte",
+  "classic:toasty":  "bereche",
+  "classic:fresh":   "pierre_peters"
 };
