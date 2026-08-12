@@ -73,6 +73,17 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);display:fl
 .cellar-card-note{font-size:12px;color:var(--ink2);line-height:1.6;margin-top:3px}
 .cellar-card-del{float:right;font-size:11px;color:var(--ink4);cursor:pointer;text-decoration:underline}
 .vocab-tier-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.vocab-variations{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.vocab-var-chip{font-size:10.5px;color:var(--ink3);background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:3px 9px;cursor:default}
+.vocab-var-example{color:var(--ink4);font-style:italic}
+.quiz-progress{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.quiz-progress-bar{height:100%;background:var(--ink3);transition:width .2s}
+.quiz-option{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px;cursor:pointer;transition:border-color .14s,background .14s;font-family:var(--sans)}
+.quiz-option:hover{border-color:var(--ink3);background:var(--paper)}
+.quiz-option-en{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink)}
+.quiz-option-fr{font-size:12px;font-style:italic;color:var(--ink3)}
+.quiz-option-example{font-size:11px;color:var(--ink4);margin-top:3px}
+.quiz-link{font-size:11.5px;color:var(--ink3);text-decoration:underline;cursor:pointer}
 .cellar-empty{padding:2.5rem 1rem;text-align:center;color:var(--ink3)}
 .cellar-empty-icon{font-size:28px;margin-bottom:10px;color:var(--ink4)}
 
@@ -1376,6 +1387,9 @@ function renderCellarView() {
 // ── Wine vocabulary (three tiers, English + French) ─────────────────────────
 const VOCAB_TIER_COLORS = { amateur:'#8c8c8c', aficionado:'#1a8c68', expert:'#922222' };
 let vocabTier = 'amateur';
+let vocabMode = 'browse'; // 'browse' | 'quiz'
+let quizStep = 0;
+let quizAnswers = {};
 
 function setVocabTier(tier) {
   vocabTier = tier;
@@ -1383,14 +1397,20 @@ function setVocabTier(tier) {
 }
 
 function renderVocabularyView() {
+  if (vocabMode === 'quiz') { renderQuiz(); return; }
+
   const el = document.getElementById('view-vocabulary');
   const tierKeys = Object.keys(VOCABULARY.tiers).sort((a,b)=>VOCABULARY.tiers[a].order-VOCABULARY.tiers[b].order);
   const activeOrder = VOCABULARY.tiers[vocabTier].order;
 
   let h = `<p class="welcome-hint" style="margin-bottom:.3rem">Learn</p><h1 class="welcome-heading" style="font-size:1.9rem;margin-bottom:.6rem">Wine vocabulary</h1>`;
-  h += `<p style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:1rem">A working vocabulary for describing what is in the glass, in English and French, moving from everyday language up to the terms a sommelier uses. Each tier adds to the one before it.</p>`;
+  h += `<p style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:.9rem">A working vocabulary for describing what is in the glass, in English and French, moving from everyday language up to the terms a sommelier uses. Each tier adds to the one before it.</p>`;
+  h += `<div class="cellar-card" style="cursor:pointer;background:var(--paper)" onclick="startQuiz()">
+    <div class="cellar-card-top"><span class="cellar-card-name">Take the sommelier quiz &rarr;</span></div>
+    <p class="cellar-card-note">Eight quick this or that choices, matched against the site's regions, ending with wines and appellations that fit what you described.</p>
+  </div>`;
 
-  h += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.4rem">`;
+  h += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin:1.1rem 0 .4rem">`;
   tierKeys.forEach(tk => {
     const t = VOCABULARY.tiers[tk];
     const active = tk === vocabTier;
@@ -1414,9 +1434,111 @@ function renderVocabularyView() {
         </div>
         <p class="cellar-card-note">${t.en.def}</p>
         <p class="cellar-card-note" style="font-style:italic;color:var(--ink3);margin-top:3px">${t.fr.def}</p>
+        <p class="vocab-variations">
+          ${t.variations.map(v=>`<span class="vocab-var-chip" title="${v.fr.replace(/"/g,'&quot;')}">${v.en} <span class="vocab-var-example">— ${v.example}</span></span>`).join('')}
+        </p>
       </div>`;
     });
   });
+
+  el.innerHTML = h;
+}
+
+// ── Sommelier quiz ("this or that") ──────────────────────────────────────────
+function startQuiz() {
+  vocabMode = 'quiz';
+  quizStep = 0;
+  quizAnswers = {};
+  renderVocabularyView();
+}
+
+function exitQuiz() {
+  vocabMode = 'browse';
+  renderVocabularyView();
+}
+
+function answerQuiz(axis, tag) {
+  quizAnswers[axis] = tag;
+  quizStep++;
+  renderVocabularyView();
+}
+
+function goBackQuiz() {
+  if (quizStep > 0) { quizStep--; renderVocabularyView(); }
+}
+
+function scoreQuizRegions() {
+  return Object.keys(QUIZ_REGION_PROFILES).map(key => {
+    const profile = QUIZ_REGION_PROFILES[key];
+    let score = 0;
+    Object.keys(quizAnswers).forEach(axis => { if (profile[axis] === quizAnswers[axis]) score++; });
+    return { key, score };
+  }).sort((a,b) => b.score - a.score);
+}
+
+function renderQuiz() {
+  const el = document.getElementById('view-vocabulary');
+  let h = `<p class="welcome-hint" style="margin-bottom:.3rem">Sommelier quiz</p>`;
+
+  if (quizStep < QUIZ_STEPS.length) {
+    const step = QUIZ_STEPS[quizStep];
+    const term = VOCABULARY.terms[step.termId];
+    h += `<h1 class="welcome-heading" style="font-size:1.7rem;margin-bottom:.3rem">${step.prompt_en}</h1>`;
+    h += `<p style="font-size:12px;color:var(--ink4);font-style:italic;margin-bottom:1.1rem">${step.prompt_fr} &middot; Step ${quizStep+1} of ${QUIZ_STEPS.length}</p>`;
+    h += `<div class="quiz-progress"><div class="quiz-progress-bar" style="width:${Math.round((quizStep/QUIZ_STEPS.length)*100)}%"></div></div>`;
+    h += `<div style="display:flex;flex-direction:column;gap:10px;margin-top:1rem">`;
+    term.variations.forEach(v => {
+      h += `<button class="quiz-option" onclick="answerQuiz('${step.axis}','${v.tag}')">
+        <span class="quiz-option-en">${v.en}</span>
+        <span class="quiz-option-fr">${v.fr}</span>
+        <span class="quiz-option-example">e.g. ${v.example}</span>
+      </button>`;
+    });
+    h += `</div>`;
+    h += `<div style="margin-top:1.2rem">`;
+    if (quizStep > 0) h += `<span class="quiz-link" onclick="goBackQuiz()">&larr; Back</span>`;
+    h += `<span class="quiz-link" style="margin-left:14px" onclick="exitQuiz()">Exit quiz</span>`;
+    h += `</div>`;
+  } else {
+    const ranked = scoreQuizRegions();
+    const top = ranked.slice(0,3).filter(r=>r.score>0);
+    const summaryBits = QUIZ_STEPS.map(step=>{
+      const tag = quizAnswers[step.axis];
+      const term = VOCABULARY.terms[step.termId];
+      const v = term.variations.find(v=>v.tag===tag);
+      return v ? v.en.toLowerCase() : '';
+    }).filter(Boolean);
+
+    h += `<h1 class="welcome-heading" style="font-size:1.7rem;margin-bottom:.6rem">Your profile</h1>`;
+    h += `<p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:1.3rem">You are drawn to a wine that is ${summaryBits.join(', ')}.</p>`;
+    h += `<p class="sec-lbl">Regions that fit</p>`;
+
+    if (!top.length) {
+      h += `<p style="font-size:13px;color:var(--ink4)">No strong match came through — try the quiz again with a clearer instinct on each choice.</p>`;
+    } else {
+      top.forEach(r => {
+        const region = TERROIR.regions[r.key];
+        if (!region) return;
+        const appId = region.appellations && region.appellations[0];
+        const app = appId ? APPELLATIONS[appId] : null;
+        const prodId = region.producers && region.producers[0];
+        const prod = prodId ? TERROIR.producers[prodId] : null;
+        h += `<div class="cellar-card" onclick="exitQuiz();selectRegion('${r.key}',true);switchTab('map')">
+          <div class="cellar-card-top">
+            <span class="cellar-card-name">${region.name}</span>
+            <span class="cellar-card-type">${r.score} of ${QUIZ_STEPS.length} match</span>
+          </div>
+          <p class="cellar-card-note">${region.summary}</p>
+          <p class="cellar-card-note" style="margin-top:4px">${app ? `Start with <strong>${app.name}</strong>` : ''}${app && prod ? ', from a producer like ' : ''}${prod ? `<strong>${prod.name}</strong>` : ''}</p>
+        </div>`;
+      });
+    }
+
+    h += `<div style="margin-top:1.2rem">`;
+    h += `<span class="quiz-link" onclick="startQuiz()">Retake the quiz</span>`;
+    h += `<span class="quiz-link" style="margin-left:14px" onclick="exitQuiz()">Back to vocabulary</span>`;
+    h += `</div>`;
+  }
 
   el.innerHTML = h;
 }

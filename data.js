@@ -910,3 +910,239 @@ const VOCABULARY = {
 
   }
 };
+
+// ─── VOCABULARY VARIATIONS ──────────────────────────────────────────────────
+// Two concrete variations per term, each with a representative wine or region.
+// Eight terms also carry a `tag`, used by the sommelier quiz below.
+
+// Appearance
+VOCABULARY.terms.vocab_appearance_intensity.variations = [
+  { en: "Pale, light bodied whites and rosés", fr: "Blancs et rosés pâles et légers", example: "Muscadet (Loire), Provence rosé" },
+  { en: "Deep, concentrated reds", fr: "Rouges profonds et concentrés", example: "Cahors (Malbec), Bandol (Mourvèdre)" }
+];
+VOCABULARY.terms.vocab_appearance_clarity.variations = [
+  { en: "Bright and star bright clear", fr: "Brillant et parfaitement limpide", example: "Champagne, most classical estate wines" },
+  { en: "Naturally hazy, unfined and unfiltered", fr: "Naturellement trouble, non collé et non filtré", example: "Pét nat and natural wine styles across the Loire and Jura" }
+];
+VOCABULARY.terms.vocab_appearance_hue.variations = [
+  { en: "Pale straw to lemon gold", fr: "Paille pâle à or citron", example: "Chablis (Burgundy), Sancerre (Loire)", tag: "pale" },
+  { en: "Deep ruby to garnet", fr: "Rubis profond à grenat", example: "Bandol (Provence), Cahors (South West)", tag: "deep" }
+];
+VOCABULARY.terms.vocab_appearance_legs.variations = [
+  { en: "Fine, slow legs", fr: "Jambes fines et lentes", example: "Cool climate wines with moderate alcohol, like Chablis" },
+  { en: "Thick, fast running legs", fr: "Jambes épaisses et rapides", example: "Warm climate, high alcohol reds like Châteauneuf du Pape" }
+];
+VOCABULARY.terms.vocab_appearance_rim.variations = [
+  { en: "Narrow, same colour rim", fr: "Disque étroit, même couleur", example: "A young, recently bottled red such as current vintage Morgon" },
+  { en: "Wide, pale rim against a darker core", fr: "Large disque pâle contre un cœur plus foncé", example: "A mature red with ten or more years in bottle, such as an aged Gevrey Chambertin" }
+];
+VOCABULARY.terms.vocab_appearance_core.variations = [
+  { en: "Core close to the rim colour", fr: "Cœur proche de la couleur du disque", example: "Young Beaujolais or Loire Cabernet Franc" },
+  { en: "Core much deeper than the rim", fr: "Cœur bien plus foncé que le disque", example: "Young, concentrated Bordeaux or Rhône reds" }
+];
+VOCABULARY.terms.vocab_appearance_bead.variations = [
+  { en: "Coarse, quickly fading bubbles", fr: "Bulles grossières qui s'estompent vite", example: "Simple, short lees ageing Crémant" },
+  { en: "Fine, persistent, long lasting bead", fr: "Bulles fines et persistantes", example: "Grower Champagne with extended lees ageing, such as Egly Ouriet" }
+];
+VOCABULARY.terms.vocab_appearance_deposit.variations = [
+  { en: "No visible deposit", fr: "Aucun dépôt visible", example: "Most filtered, commercial wines" },
+  { en: "Fine natural sediment", fr: "Fin dépôt naturel", example: "Unfiltered, aged Bordeaux or a natural Jura red" }
+];
+VOCABULARY.terms.vocab_appearance_bricking.variations = [
+  { en: "Slight bricking at the rim only", fr: "Léger tuilé au disque seulement", example: "A red around ten years old, still mostly youthful" },
+  { en: "Bricking through the whole glass", fr: "Tuilé sur l'ensemble du verre", example: "A fully mature red, twenty years or more, like an old Hermitage" }
+];
+VOCABULARY.terms.vocab_appearance_onionskin.variations = [
+  { en: "Faint copper edge on a young rosé", fr: "Légère pointe cuivrée sur un rosé jeune", example: "An oxidative style rosé, such as some Bandol" },
+  { en: "Full amber, onion skin colour", fr: "Ambre complet, couleur pelure d'oignon", example: "An intentionally oxidative white, such as a Jura Savagnin under voile" }
+];
+VOCABULARY.terms.vocab_appearance_robe_precision.variations = [
+  { en: "Pourpre, blue toned purple", fr: "Pourpre, violet à reflets bleutés", example: "A very young, recently released Cahors" },
+  { en: "Grenat, garnet with an orange edge", fr: "Grenat, avec un reflet orangé", example: "A Burgundy Pinot Noir with some bottle age" }
+];
+VOCABULARY.terms.vocab_appearance_limpidity.variations = [
+  { en: "Brilliant, polished clarity", fr: "Clarté brillante et polie", example: "A well made, cellar aged Champagne" },
+  { en: "Soft, gentle brightness without polish", fr: "Brillance douce, sans éclat marqué", example: "A gently handled, minimal intervention white" }
+];
+
+// Nose
+VOCABULARY.terms.vocab_nose_fruit.variations = [
+  { en: "Fresh, bright red fruit and citrus", fr: "Fruits rouges frais et agrumes", example: "Sancerre (Loire), young Morgon (Beaujolais)", tag: "bright" },
+  { en: "Ripe, dark, brooding fruit", fr: "Fruits sombres, mûrs et profonds", example: "Cahors (South West), Châteauneuf du Pape (Rhône)", tag: "dark" }
+];
+VOCABULARY.terms.vocab_nose_floral.variations = [
+  { en: "Delicate white flowers", fr: "Fleurs blanches délicates", example: "Riesling from Alsace, or a fine Condrieu (Rhône Viognier)" },
+  { en: "Heady, exotic blossom", fr: "Fleurs exotiques et capiteuses", example: "Gewurztraminer (Alsace), Muscat based wines" }
+];
+VOCABULARY.terms.vocab_nose_oaky.variations = [
+  { en: "Toasted, vanilla, spiced oak", fr: "Boisé toasté, vanillé, épicé", example: "Oaked Meursault (Burgundy), classed growth Bordeaux", tag: "yes" },
+  { en: "No oak, pure and unadorned fruit", fr: "Sans bois, fruit pur et sans artifice", example: "Chablis (Burgundy), Muscadet (Loire)", tag: "no" }
+];
+VOCABULARY.terms.vocab_nose_fault.variations = [
+  { en: "Wet cardboard, musty (cork taint)", fr: "Carton mouillé, moisi (goût de bouchon)", example: "A corked bottle from any producer, unrelated to how it was made" },
+  { en: "Sharp vinegar or nail polish edge", fr: "Note tranchante de vinaigre ou de dissolvant", example: "An oxidised or bacterially unstable bottle" }
+];
+VOCABULARY.terms.vocab_nose_primary.variations = [
+  { en: "Citrus and green apple", fr: "Agrumes et pomme verte", example: "Sancerre (Loire), Chablis (Burgundy)" },
+  { en: "Blackcurrant bud and violet", fr: "Bourgeon de cassis et violette", example: "Chinon (Loire Cabernet Franc)" }
+];
+VOCABULARY.terms.vocab_nose_secondary.variations = [
+  { en: "Bread and brioche from lees ageing", fr: "Pain et brioche issus de l'élevage sur lies", example: "Vintage Champagne, such as Bérêche & Fils" },
+  { en: "Butter and cream from malolactic conversion", fr: "Beurre et crème issus de la fermentation malolactique", example: "Oaked Meursault (Burgundy)" }
+];
+VOCABULARY.terms.vocab_nose_intensity.variations = [
+  { en: "Closed, reticent, needs air or time", fr: "Fermé, réservé, a besoin d'air ou de temps", example: "A young, recently bottled Gevrey Chambertin" },
+  { en: "Expressive, generous, easy to read", fr: "Expressif, généreux, facile à lire", example: "Alsace Gewurztraminer" }
+];
+VOCABULARY.terms.vocab_nose_complexity.variations = [
+  { en: "Simple, one clear note", fr: "Simple, une note dominante et nette", example: "A straightforward, everyday Beaujolais" },
+  { en: "Layered, several aromas at once", fr: "Superposé, plusieurs arômes à la fois", example: "A mature grower Champagne or a fine Hermitage" }
+];
+VOCABULARY.terms.vocab_nose_reduction.variations = [
+  { en: "Light flint or struck match", fr: "Léger silex ou allumette", example: "Chablis or grower Champagne, often blows off with swirling" },
+  { en: "Heavier cooked cabbage or rubber", fr: "Chou cuit ou caoutchouc plus marqué", example: "A wine bottled with very little oxygen exposure, often needs decanting" }
+];
+VOCABULARY.terms.vocab_nose_brett.variations = [
+  { en: "A light touch, spice and leather", fr: "Une touche légère, épices et cuir", example: "Some traditional, minimal sulphur Rhône and Languedoc reds" },
+  { en: "Dominant, barnyard and sweaty saddle", fr: "Dominant, basse cour et cuir de selle", example: "An older bottle from a producer working with minimal intervention" }
+];
+VOCABULARY.terms.vocab_nose_petrol.variations = [
+  { en: "Early petrol, still mostly fruit", fr: "Pétrole naissant, encore surtout fruité", example: "A five to seven year old Alsace Riesling" },
+  { en: "Full kerosene character", fr: "Caractère de kérosène pleinement développé", example: "A fifteen year old or older Alsace or German Riesling" }
+];
+VOCABULARY.terms.vocab_nose_garrigue.variations = [
+  { en: "Thyme and rosemary", fr: "Thym et romarin", example: "Bandol (Provence)" },
+  { en: "Lavender and bay leaf", fr: "Lavande et laurier", example: "Châteauneuf du Pape (Rhône)" }
+];
+
+// Palate & structure
+VOCABULARY.terms.vocab_palate_tannin.variations = [
+  { en: "Silky, fine grained tannin", fr: "Tanin soyeux et fin", example: "Volnay (Burgundy Pinot Noir)" },
+  { en: "Firm, chewy, structured tannin", fr: "Tanin ferme, mâché, structuré", example: "Pauillac (Bordeaux), young Madiran (South West Tannat)" }
+];
+VOCABULARY.terms.vocab_palate_acidity.variations = [
+  { en: "Crisp, mouthwatering acidity", fr: "Acidité vive, qui fait saliver", example: "Chablis (Burgundy), Sancerre (Loire)", tag: "crisp" },
+  { en: "Soft, round acidity", fr: "Acidité souple et ronde", example: "Southern Rhône Grenache, warm vintage Languedoc reds", tag: "soft" }
+];
+VOCABULARY.terms.vocab_palate_body.variations = [
+  { en: "Light, delicate on the palate", fr: "Léger et délicat en bouche", example: "Muscadet (Loire), Beaujolais Cru", tag: "light" },
+  { en: "Full, powerful, weighty", fr: "Corsé, puissant, avec du poids", example: "Châteauneuf du Pape (Rhône), classed growth Bordeaux", tag: "full" }
+];
+VOCABULARY.terms.vocab_palate_sweetness.variations = [
+  { en: "Bone dry", fr: "Sec", example: "Most Burgundy, Loire, and Bordeaux table wines", tag: "dry" },
+  { en: "A touch of sweetness", fr: "Une pointe de douceur", example: "Alsace Riesling Vendanges Tardives, Vouvray demi sec", tag: "offdry" }
+];
+VOCABULARY.terms.vocab_palate_minerality.variations = [
+  { en: "Wet stone and chalk", fr: "Pierre mouillée et craie", example: "Chablis (Burgundy), on Kimmeridgian limestone" },
+  { en: "Saline, almost oyster shell like", fr: "Salin, presque iodé", example: "Muscadet (Loire), grown near the Atlantic coast" }
+];
+VOCABULARY.terms.vocab_palate_heat.variations = [
+  { en: "Barely noticeable warmth", fr: "Chaleur à peine perceptible", example: "A cool climate Alsace Riesling, around 12 percent alcohol" },
+  { en: "Noticeable, peppery warmth", fr: "Chaleur marquée, presque poivrée", example: "A ripe, high alcohol Châteauneuf du Pape, often above 15 percent" }
+];
+VOCABULARY.terms.vocab_palate_texture.variations = [
+  { en: "Silky, smooth, round texture", fr: "Texture soyeuse, souple, ronde", example: "Volnay (Burgundy), a well made Loire Chenin Blanc", tag: "silky" },
+  { en: "Firm, structured, angular texture", fr: "Texture ferme, structurée, anguleuse", example: "Young Pauillac (Bordeaux), Hermitage (Rhône)", tag: "structured" }
+];
+VOCABULARY.terms.vocab_palate_concentration.variations = [
+  { en: "Light, dilute, easy drinking", fr: "Léger, dilué, facile à boire", example: "A simple, high yield Languedoc value wine" },
+  { en: "Dense, concentrated, low yield", fr: "Dense, concentré, issu de faibles rendements", example: "A grand cru Burgundy or classed growth Bordeaux" }
+];
+VOCABULARY.terms.vocab_palate_malolactic.variations = [
+  { en: "Partial, keeps some crisp edge", fr: "Partielle, conserve un peu de vivacité", example: "Some cool climate Chardonnay in Chablis" },
+  { en: "Full, creamy and buttery", fr: "Complète, crémeuse et beurrée", example: "Classic oaked Meursault (Burgundy)" }
+];
+VOCABULARY.terms.vocab_palate_phenolic_ripeness.variations = [
+  { en: "Underripe, slightly green tannin", fr: "Sous mûr, tanin légèrement vert", example: "A red picked early in a difficult, rainy vintage" },
+  { en: "Fully ripe, sweet, round tannin", fr: "Pleinement mûr, tanin doux et rond", example: "A red from a warm, generous vintage, like 2015 or 2018 Bordeaux" }
+];
+VOCABULARY.terms.vocab_palate_volatile_acidity.variations = [
+  { en: "A faint, pleasant lift", fr: "Une pointe agréable et discrète", example: "Some traditional, low intervention Rhône and Languedoc reds" },
+  { en: "Sharp, dominant vinegar note", fr: "Note de vinaigre nette et dominante", example: "A wine with a genuine winemaking fault, not tied to any region" }
+];
+VOCABULARY.terms.vocab_palate_dosage.variations = [
+  { en: "Brut nature, no dosage", fr: "Brut nature, sans dosage", example: "Zero dosage grower Champagne, such as some cuvées from Bérêche & Fils" },
+  { en: "Classic brut dosage", fr: "Dosage brut classique", example: "Most standard Champagne house non vintage blends" }
+];
+
+// Finish
+VOCABULARY.terms.vocab_finish_length.variations = [
+  { en: "Short, clean, easy finish", fr: "Finale courte, nette, facile", example: "An everyday Muscadet or simple Languedoc white", tag: "short" },
+  { en: "Long finish, flavour lingers for minutes", fr: "Finale longue, la saveur persiste plusieurs minutes", example: "Grand cru Champagne, a fine mature Hermitage", tag: "long" }
+];
+VOCABULARY.terms.vocab_finish_aftertaste.variations = [
+  { en: "Fruit driven aftertaste", fr: "Arrière goût dominé par le fruit", example: "A young, fruit forward Beaujolais" },
+  { en: "Savoury, mineral aftertaste", fr: "Arrière goût salin et minéral", example: "Chablis (Burgundy)" }
+];
+VOCABULARY.terms.vocab_finish_clean.variations = [
+  { en: "Clean and precise to the end", fr: "Net et précis jusqu'au bout", example: "A well made, technically sound wine from any region" },
+  { en: "Slightly rustic, less polished ending", fr: "Finale légèrement rustique, moins polie", example: "A traditional, minimal intervention farmhouse style wine" }
+];
+VOCABULARY.terms.vocab_finish_bitter.variations = [
+  { en: "A light, appetising bitterness", fr: "Une légère amertume qui ouvre l'appétit", example: "Grenache based reds from the southern Rhône" },
+  { en: "Harsh, unripe bitterness", fr: "Amertume dure et sous mûre", example: "A red made from underripe grapes in a difficult vintage" }
+];
+VOCABULARY.terms.vocab_finish_balance.variations = [
+  { en: "Fruit and freshness in balance", fr: "Fruit et fraîcheur en équilibre", example: "A well made Loire Chenin Blanc" },
+  { en: "Power and structure in balance", fr: "Puissance et structure en équilibre", example: "A great vintage classed growth Bordeaux" }
+];
+VOCABULARY.terms.vocab_finish_evolution.variations = [
+  { en: "Stays consistent from entry to finish", fr: "Reste constant de l'attaque à la finale", example: "A simple, well made everyday wine" },
+  { en: "Changes and builds through the finish", fr: "Évolue et se construit jusqu'à la finale", example: "A great white Burgundy, gaining richness as it opens" }
+];
+VOCABULARY.terms.vocab_finish_dryness.variations = [
+  { en: "Soft, barely drying", fr: "Doux, à peine asséchant", example: "A Loire Cabernet Franc, such as Chinon" },
+  { en: "Firmly drying, grips the gums", fr: "Franchement asséchant, prend les gencives", example: "A young Madiran (South West Tannat)" }
+];
+VOCABULARY.terms.vocab_finish_persistence.variations = [
+  { en: "A few seconds, then fades", fr: "Quelques secondes, puis s'efface", example: "A light, everyday Beaujolais" },
+  { en: "Persists for a minute or more", fr: "Persiste pendant une minute ou plus", example: "A fine vintage Champagne or grand cru Burgundy" }
+];
+VOCABULARY.terms.vocab_finish_tertiary.variations = [
+  { en: "Early tertiary notes, forest floor", fr: "Premières notes tertiaires, sous bois", example: "A ten year old Gevrey Chambertin" },
+  { en: "Full tertiary development, leather and tobacco", fr: "Développement tertiaire complet, cuir et tabac", example: "A mature Pauillac, twenty years or older" }
+];
+VOCABULARY.terms.vocab_finish_retro_olfaction.variations = [
+  { en: "Confirms what the nose promised", fr: "Confirme ce que le nez annonçait", example: "A harmonious, well made wine from any region" },
+  { en: "Reveals something the nose missed", fr: "Révèle quelque chose que le nez n'avait pas capté", example: "A wine that seems simple on the nose but opens up in the mouth, common in Chenin Blanc" }
+];
+VOCABULARY.terms.vocab_finish_typicity.variations = [
+  { en: "Textbook example of its appellation", fr: "Exemple d'école de son appellation", example: "A classic Sancerre, tasting exactly as expected" },
+  { en: "An outlier, unusual for its appellation", fr: "Atypique pour son appellation", example: "A riper, more exotic Chablis in a very warm vintage" }
+];
+VOCABULARY.terms.vocab_finish_caudalie.variations = [
+  { en: "A handful of caudalies, five to eight", fr: "Quelques caudalies, cinq à huit", example: "An easy drinking, everyday wine" },
+  { en: "Fifteen caudalies or more, exceptional", fr: "Quinze caudalies ou plus, exceptionnel", example: "A great vintage Champagne or first growth Bordeaux" }
+];
+
+// ─── SOMMELIER QUIZ ──────────────────────────────────────────────────────────
+// "This or that": eight steps, each pulling its two options directly from a
+// vocabulary term's two tagged variations, so every pair is a genuine match.
+// Answers are scored against a simplified signature style per region.
+const QUIZ_STEPS = [
+  { id: "color",     axis: "color",     termId: "vocab_appearance_hue",   prompt_en: "Pick the colour that pulls you in.",              prompt_fr: "Choisissez la couleur qui vous attire." },
+  { id: "fruit",      axis: "fruit",     termId: "vocab_nose_fruit",       prompt_en: "Which fruit character do you reach for?",         prompt_fr: "Quel caractère de fruit recherchez vous ?" },
+  { id: "oak",        axis: "oak",       termId: "vocab_nose_oaky",        prompt_en: "Oak, or no oak?",                                  prompt_fr: "Bois, ou sans bois ?" },
+  { id: "body",       axis: "body",      termId: "vocab_palate_body",      prompt_en: "How much weight do you want in the glass?",       prompt_fr: "Quel poids recherchez vous dans le verre ?" },
+  { id: "acidity",    axis: "acidity",   termId: "vocab_palate_acidity",   prompt_en: "Crisp, or round?",                                 prompt_fr: "Vif, ou rond ?" },
+  { id: "texture",    axis: "texture",   termId: "vocab_palate_texture",   prompt_en: "Silky, or structured?",                            prompt_fr: "Soyeux, ou structuré ?" },
+  { id: "sweetness",  axis: "sweetness", termId: "vocab_palate_sweetness", prompt_en: "Dry, or a touch of sweetness?",                    prompt_fr: "Sec, ou une pointe de douceur ?" },
+  { id: "finish",     axis: "finish",    termId: "vocab_finish_length",    prompt_en: "Short and easy, or long and complex?",             prompt_fr: "Courte et facile, ou longue et complexe ?" }
+];
+
+// Simplified signature style per region across the eight quiz axes.
+// A region can make several styles; this captures its single most iconic one,
+// which is what the quiz matches against and what the result text should reflect.
+const QUIZ_REGION_PROFILES = {
+  champagne:  { color: "pale", fruit: "bright", oak: "no",  body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "long"  },
+  alsace:     { color: "pale", fruit: "bright", oak: "no",  body: "full",  acidity: "crisp", texture: "silky",      sweetness: "offdry", finish: "long"  },
+  loire:      { color: "pale", fruit: "bright", oak: "no",  body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
+  burgundy:   { color: "deep", fruit: "bright", oak: "yes", body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "long"  },
+  beaujolais: { color: "deep", fruit: "bright", oak: "no",  body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
+  bordeaux:   { color: "deep", fruit: "dark",   oak: "yes", body: "full",  acidity: "soft",   texture: "structured", sweetness: "dry",    finish: "long"  },
+  rhone:      { color: "deep", fruit: "dark",   oak: "yes", body: "full",  acidity: "soft",   texture: "structured", sweetness: "dry",    finish: "long"  },
+  provence:   { color: "pale", fruit: "bright", oak: "no",  body: "light", acidity: "crisp", texture: "silky",      sweetness: "dry",    finish: "short" },
+  languedoc:  { color: "deep", fruit: "dark",   oak: "no",  body: "full",  acidity: "soft",   texture: "structured", sweetness: "dry",    finish: "short" },
+  sw:         { color: "deep", fruit: "dark",   oak: "yes", body: "full",  acidity: "soft",   texture: "structured", sweetness: "dry",    finish: "long"  },
+  jura:       { color: "pale", fruit: "bright", oak: "no",  body: "full",  acidity: "crisp", texture: "structured", sweetness: "dry",    finish: "long"  }
+};
