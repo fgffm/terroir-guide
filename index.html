@@ -72,6 +72,7 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);display:fl
 .cellar-card-type{font-size:10px;color:var(--ink4);text-transform:uppercase;letter-spacing:.05em}
 .cellar-card-note{font-size:12px;color:var(--ink2);line-height:1.6;margin-top:3px}
 .cellar-card-del{float:right;font-size:11px;color:var(--ink4);cursor:pointer;text-decoration:underline}
+.vocab-tier-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .cellar-empty{padding:2.5rem 1rem;text-align:center;color:var(--ink3)}
 .cellar-empty-icon{font-size:28px;margin-bottom:10px;color:var(--ink4)}
 
@@ -309,6 +310,7 @@ body.mobile-zoomed.detail-visible #mobile-back-btn{display:flex;opacity:1;transf
     <button class="nav-tab"        id="tab-calendar" onclick="switchTab('calendar')">Vintages</button>
     <button class="nav-tab"        id="tab-pairings" onclick="switchTab('pairings')">Pairings</button>
     <button class="nav-tab"        id="tab-grapes"   onclick="switchTab('grapes')">Grapes</button>
+    <button class="nav-tab"        id="tab-vocabulary" onclick="switchTab('vocabulary')">Vocabulary</button>
     <button class="nav-tab"        id="tab-cellar"   onclick="switchTab('cellar')">My Cellar</button>
     <button class="search-btn" id="search-open-btn" onclick="openSearch()" aria-label="Search">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
@@ -353,6 +355,7 @@ body.mobile-zoomed.detail-visible #mobile-back-btn{display:flex;opacity:1;transf
     <div class="view" id="view-grape"></div>
     <div class="view" id="view-grapes-index"></div>
     <div class="view" id="view-cellar"></div>
+    <div class="view" id="view-vocabulary"></div>
 
     <div class="view" id="view-calendar">
       <p class="sec-lbl">Cross-region vintage guide</p>
@@ -931,6 +934,7 @@ function switchTab(tab) {
   else if (tab==='calendar') { navStack=[]; showView('calendar'); }
   else if (tab==='pairings') { navStack=[]; showView('pairings'); }
   else if (tab==='grapes')   { navStack=[]; showView('grapes-index'); }
+  else if (tab==='vocabulary') { navStack=[]; renderVocabularyView(); showView('vocabulary'); }
   else if (tab==='cellar')   { navStack=[]; renderCellarView(); showView('cellar'); }
 }
 
@@ -1366,6 +1370,54 @@ function renderCellarView() {
       <div class="cellar-card-note">${e.note.replace(/</g,'&lt;')}</div>
     </div>`;
   });
+  el.innerHTML = h;
+}
+
+// ── Wine vocabulary (three tiers, English + French) ─────────────────────────
+const VOCAB_TIER_COLORS = { amateur:'#8c8c8c', aficionado:'#1a8c68', expert:'#922222' };
+let vocabTier = 'amateur';
+
+function setVocabTier(tier) {
+  vocabTier = tier;
+  renderVocabularyView();
+}
+
+function renderVocabularyView() {
+  const el = document.getElementById('view-vocabulary');
+  const tierKeys = Object.keys(VOCABULARY.tiers).sort((a,b)=>VOCABULARY.tiers[a].order-VOCABULARY.tiers[b].order);
+  const activeOrder = VOCABULARY.tiers[vocabTier].order;
+
+  let h = `<p class="welcome-hint" style="margin-bottom:.3rem">Learn</p><h1 class="welcome-heading" style="font-size:1.9rem;margin-bottom:.6rem">Wine vocabulary</h1>`;
+  h += `<p style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:1rem">A working vocabulary for describing what is in the glass, in English and French, moving from everyday language up to the terms a sommelier uses. Each tier adds to the one before it.</p>`;
+
+  h += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.4rem">`;
+  tierKeys.forEach(tk => {
+    const t = VOCABULARY.tiers[tk];
+    const active = tk === vocabTier;
+    const style = active ? `background:${VOCAB_TIER_COLORS[tk]};border-color:${VOCAB_TIER_COLORS[tk]}` : '';
+    h += `<button class="rn-pill${active?' active':''}" style="${style}" onclick="setVocabTier('${tk}')">${t.en} · ${t.fr}</button>`;
+  });
+  h += `</div>`;
+  h += `<p style="font-size:11.5px;color:var(--ink4);font-style:italic;margin-bottom:1.3rem">${VOCABULARY.tiers[vocabTier].en_desc}</p>`;
+
+  Object.keys(VOCABULARY.categories).forEach(catKey => {
+    const cat = VOCABULARY.categories[catKey];
+    const terms = Object.values(VOCABULARY.terms).filter(t => t.category === catKey && VOCABULARY.tiers[t.tier].order <= activeOrder);
+    if (!terms.length) return;
+    h += `<p class="sec-lbl">${cat.en} <span style="font-size:10px;font-weight:400;color:var(--ink4);letter-spacing:0;text-transform:none">${cat.fr}</span></p>`;
+    terms.forEach(t => {
+      h += `<div class="cellar-card" style="cursor:default">
+        <div class="cellar-card-top">
+          <span class="vocab-tier-dot" style="background:${VOCAB_TIER_COLORS[t.tier]}" title="${VOCABULARY.tiers[t.tier].en}"></span>
+          <span class="cellar-card-name">${t.en.term}</span>
+          <span class="cellar-card-type" style="font-style:italic;text-transform:none;letter-spacing:0">${t.fr.term}</span>
+        </div>
+        <p class="cellar-card-note">${t.en.def}</p>
+        <p class="cellar-card-note" style="font-style:italic;color:var(--ink3);margin-top:3px">${t.fr.def}</p>
+      </div>`;
+    });
+  });
+
   el.innerHTML = h;
 }
 
